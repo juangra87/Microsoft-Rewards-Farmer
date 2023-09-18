@@ -16,7 +16,7 @@ class Login:
 
     def login(self):
         logging.info("[LOGIN] " + "Logging-in...")
-        self.webdriver.get("https://login.live.com/")
+        self.webdriver.get("https://www.bing.com/fd/auth/signin?action=interactive&provider=windows_live_id&return_url=https%3A%2F%2Fwww.bing.com%2F")
         alreadyLoggedIn = False
         while True:
             try:
@@ -67,17 +67,8 @@ class Login:
             logging.info("[LOGIN] Press enter when confirmed...")
             input()
 
-        while not (
-            urllib.parse.urlparse(self.webdriver.current_url).path == "/"
-            and urllib.parse.urlparse(self.webdriver.current_url).hostname
-            == "account.microsoft.com"
-        ):
-            self.utils.tryDismissAllMessages()
-            time.sleep(1)
-
-        self.utils.waitUntilVisible(
-            By.CSS_SELECTOR, 'html[data-role-name="MeePortal"]', 10
-        )
+        self.utils.tryDismissAllMessages()
+        time.sleep(1)
 
     def enterPassword(self, password):
         self.utils.waitUntilClickable(By.NAME, "passwd", 10)
