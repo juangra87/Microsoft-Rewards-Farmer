@@ -211,8 +211,9 @@ class Utils:
         for counter in counters["pcSearch"]:
             progressDesktop += counter["pointProgress"]
             targetDesktop += counter["pointProgressMax"]
+        logging.info(f"[REMAINING POINTS FROM SEARCHES]: {targetDesktop - progressDesktop}")
 
-        if targetDesktop in [33, 102]:
+        if targetDesktop in [33, 102, 90]:
             # Level 1 or 2 EU
             searchPoints = 3
         elif targetDesktop == 55 or targetDesktop >= 170:
