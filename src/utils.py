@@ -4,6 +4,7 @@ import locale as pylocale
 import time
 import urllib.parse
 from pathlib import Path
+import logging
 
 import requests
 from selenium.webdriver.chrome.webdriver import WebDriver
@@ -204,14 +205,13 @@ class Utils:
         counters = dashboard["userStatus"]["counters"]
         if "pcSearch" not in counters:
             return 0, 0
-        progressDesktop = (
-            counters["pcSearch"][0]["pointProgress"]
-            + counters["pcSearch"][1]["pointProgress"]
-        )
-        targetDesktop = (
-            counters["pcSearch"][0]["pointProgressMax"]
-            + counters["pcSearch"][1]["pointProgressMax"]
-        )
+
+        progressDesktop = 0
+        targetDesktop = 0
+        for counter in counters["pcSearch"]:
+            progressDesktop += counter["pointProgress"]
+            targetDesktop += counter["pointProgressMax"]
+
         if targetDesktop in [33, 102]:
             # Level 1 or 2 EU
             searchPoints = 3
