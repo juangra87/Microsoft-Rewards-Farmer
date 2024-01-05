@@ -2,7 +2,6 @@ import argparse
 import json
 import logging
 import logging.handlers as handlers
-import random
 import sys
 from pathlib import Path
 
@@ -19,11 +18,12 @@ def main():
     args = argumentParser()
     notifier = Notifier(args)
     loadedAccounts = setupAccounts()
-    for currentAccount in loadedAccounts:
-        try:
-            executeBot(currentAccount, notifier, args)
-        except Exception as e:
-            logging.exception(f"{e.__class__.__name__}: {e}")
+    while 1:
+        for currentAccount in loadedAccounts:
+            try:
+                executeBot(currentAccount, notifier, args)
+            except Exception as e:
+                logging.exception(f"{e.__class__.__name__}: {e}")
 
 
 def setupLogging():
@@ -116,7 +116,6 @@ def setupAccounts() -> dict:
         logging.warning(noAccountsNotice)
         exit()
     loadedAccounts = json.loads(accountPath.read_text(encoding="utf-8"))
-    random.shuffle(loadedAccounts)
     return loadedAccounts
 
 
