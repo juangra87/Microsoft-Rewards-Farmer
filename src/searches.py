@@ -82,9 +82,9 @@ class Searches:
                 searchbar = self.webdriver.find_element(By.ID, "sb_form_q")
                 searchbar.send_keys(word)
                 searchbar.submit()
-                time.sleep(random.randint(200, 300))
+                time.sleep(random.randint(self.browser.sleep - 10, self.browser.sleep + 10))
                 return self.browser.utils.getBingAccountPoints()
             except TimeoutException:
                 logging.error("[BING] " + "Timeout, retrying in 5 seconds...")
-                time.sleep(10)
+                time.sleep(5)
                 continue

@@ -51,12 +51,14 @@
      {
        "username": "Your Email 1",
        "password": "Your Password 1",
-       "proxy": "http://user:pass@host1:port"
+       "proxy": "http://user:pass@host1:port",
+        "sleep":  300,
      },
      {
        "username": "Your Email 2",
        "password": "Your Password 2",
-       "proxy": "http://user:pass@host2:port"
+       "proxy": "http://user:pass@host2:port",
+        "sleep":  200,
      }
    ]
    ```

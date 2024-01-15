@@ -13,6 +13,7 @@ from src.userAgentGenerator import GenerateUserAgent
 from src.utils import Utils
 
 
+DEFAULT_SLEEP = 300
 class Browser:
     """WebDriver wrapper class."""
 
@@ -22,6 +23,13 @@ class Browser:
         self.headless = not args.visible
         self.username = account["username"]
         self.password = account["password"]
+        try:
+            self.sleep = account["sleep"]
+        except Exception:
+            self.sleep = DEFAULT_SLEEP
+        logging.info(
+            f'[BROWSER] { self.sleep } seconds between searches '
+        )
         self.localeLang, self.localeGeo = self.getCCodeLang(args.lang, args.geo)
         self.proxy = None
         if args.proxy:
