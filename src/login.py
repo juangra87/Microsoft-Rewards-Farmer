@@ -18,8 +18,11 @@ class Login:
         logging.info("[LOGIN] " + "Logging-in...")
         self.webdriver.get("https://www.bing.com/fd/auth/signin?action=interactive&provider=windows_live_id&return_url=https%3A%2F%2Fwww.bing.com%2F")
         alreadyLoggedIn = False
-        while True:
+
+        tries = 0
+        while tries < 10:
             try:
+                tries += 1
                 self.utils.waitUntilVisible(
                     By.CSS_SELECTOR, 'html[data-role-name="MeePortal"]', 0.1
                 )
@@ -32,6 +35,8 @@ class Login:
                 except Exception:  # pylint: disable=broad-except
                     if self.utils.tryDismissAllMessages():
                         continue
+            finally:
+                alreadyLoggedIn= False
 
         if not alreadyLoggedIn:
             self.executeLogin()
