@@ -66,9 +66,7 @@ class Login:
         self.utils.waitUntilClickable(By.NAME, "passwd", 10)
         self.utils.waitUntilClickable(By.ID, "idSIButton9", 10)
         password = password.replace("\\", "\\\\").replace('"', '\\"')
-        self.webdriver.execute_script(
-            f'document.getElementsByName("passwd")[0].value = "{password}";'
-        )
+        self.webdriver.find_element(By.NAME,"passwd").send_keys(password)
         logging.info("[LOGIN] " + "Writing password...")
         time.sleep(3)
         self.webdriver.find_element(By.ID, "idSIButton9").click()

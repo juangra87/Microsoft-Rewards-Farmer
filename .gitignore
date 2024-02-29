@@ -182,3 +182,4 @@ accounts.json
 sessions
 logs
 .idea
+/version.txt
