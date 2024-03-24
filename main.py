@@ -3,12 +3,13 @@ import json
 import logging
 import logging.handlers as handlers
 import sys
+import time
 from pathlib import Path
 
 from src import Browser, DailySet, Login, MorePromotions, PunchCards, Searches
-from src.constants import VERSION
 from src.loggingColoredFormatter import ColoredFormatter
 from src.notifier import Notifier
+from datetime import date, datetime
 
 POINTS_COUNTER = 0
 
@@ -18,13 +19,25 @@ def main():
     args = argumentParser()
     notifier = Notifier(args)
     loadedAccounts = setupAccounts()
-    while 1:
-        for currentAccount in loadedAccounts:
-            try:
-                executeBot(currentAccount, notifier, args)
-            except Exception as e:
-                logging.exception(f"{e.__class__.__name__}: {e}")
 
+    while 1:
+        dailyProcessIsDone = [False] * len(loadedAccounts)
+        startingDate = date.today()
+        logging.info(f'******************** { startingDate } ********************')
+        while (not any(dailyProcessIsDone)):
+            for i, currentAccount in enumerate(loadedAccounts):
+                try:
+                    executeBot(currentAccount, notifier, args)
+                    dailyProcessIsDone[i] = True
+                except Exception as e:
+                    logging.exception(f"{e.__class__.__name__}: {e}")
+        waitUntilNextDay(startingDate)
+
+
+def waitUntilNextDay(startingDate: date):
+    logging.warning(f'******************** stopped until tomorrow ********************')
+    while startingDate == date.today():
+        time.sleep(600)
 
 def setupLogging():
     format = "%(asctime)s [%(levelname)s] %(message)s"
@@ -84,20 +97,6 @@ def argumentParser() -> argparse.Namespace:
         help="Optional: Discord Webhook URL (ex: https://discord.com/api/webhooks/123456789/ABCdefGhIjKlmNoPQRsTUVwxyZ)",
     )
     return parser.parse_args()
-
-
-def bannerDisplay():
-    farmerBanner = """
-    ███╗   ███╗███████╗    ███████╗ █████╗ ██████╗ ███╗   ███╗███████╗██████╗
-    ████╗ ████║██╔════╝    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝██╔══██╗
-    ██╔████╔██║███████╗    █████╗  ███████║██████╔╝██╔████╔██║█████╗  ██████╔╝
-    ██║╚██╔╝██║╚════██║    ██╔══╝  ██╔══██║██╔══██╗██║╚██╔╝██║██╔══╝  ██╔══██╗
-    ██║ ╚═╝ ██║███████║    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗██║  ██║
-    ╚═╝     ╚═╝╚══════╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝"""
-    logging.error(farmerBanner)
-    logging.warning(
-        f"        by Charles Bel (@charlesbel)               version {VERSION}\n"
-    )
 
 
 def setupAccounts() -> dict:
