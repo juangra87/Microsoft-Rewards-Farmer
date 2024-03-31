@@ -15,12 +15,11 @@ POINTS_COUNTER = 0
 
 
 def main():
-    setupLogging()
-    args = argumentParser()
-    notifier = Notifier(args)
-    loadedAccounts = setupAccounts()
-
     while 1:
+        setupLogging()
+        args = argumentParser()
+        notifier = Notifier(args)
+        loadedAccounts = setupAccounts()
         dailyProcessIsDone = [False] * len(loadedAccounts)
         startingDate = date.today()
         logging.info(f'******************** { startingDate } ********************')
