@@ -31,4 +31,4 @@ jobs:
           context: .
           push: true
           tags: juangra87/ms-farmer:latest
-          platforms: linux/arm64,linux/amd64, linux/arm
+          platforms: linux/arm64,linux/amd64
