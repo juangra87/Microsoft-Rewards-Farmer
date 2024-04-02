@@ -96,3 +96,17 @@
 ## Future Features
 
 - GUI
+
+## Docker version
+### Generating image
+
+`docker build -t juangra87/ms-farmer:latest .`
+`docker login -u juangra87`
+`docker push juangra87/ms-farmer:latest`
+
+### Using image in a docker isolated instance
+
+- Copy to one folder both [docker-compose.yml](docker-compose.yml) and your own [accounts.json](accounts.json)
+- In that same folder, execute `docker-compose up -d` to start running the farmer docker image
+
+

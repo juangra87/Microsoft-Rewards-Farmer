@@ -1,0 +1,8 @@
+services:
+  rewards-farmer:
+    image: juangra87/ms-farmer:latest
+    container_name: ms-rew-farm
+    command: bash -c 'python3 main.py'
+    volumes:
+      - ./accounts.json:/app/accounts.json
+      - ./logs:/app/logs
