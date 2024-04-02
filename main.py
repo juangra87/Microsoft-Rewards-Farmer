@@ -9,9 +9,9 @@ from pathlib import Path
 from src import Browser, DailySet, Login, MorePromotions, PunchCards, Searches
 from src.loggingColoredFormatter import ColoredFormatter
 from src.notifier import Notifier
-from datetime import date, datetime
+from datetime import date
 
-POINTS_COUNTER = 0
+COOL_DOWN_HOURS = 1
 
 
 def main():
@@ -30,13 +30,12 @@ def main():
                     dailyProcessIsDone[i] = True
                 except Exception as e:
                     logging.exception(f"{e.__class__.__name__}: {e}")
-        waitUntilNextDay(startingDate)
+        coolDownBy(COOL_DOWN_HOURS)
 
 
-def waitUntilNextDay(startingDate: date):
-    logging.warning(f'******************** stopped until tomorrow ********************')
-    while startingDate == date.today():
-        time.sleep(600)
+def coolDownBy(hours: int):
+    logging.warning(f'******************** cooling down: {hours} hour/s ********************')
+    time.sleep(hours * 3600)
 
 def setupLogging():
     format = "%(asctime)s [%(levelname)s] %(message)s"
