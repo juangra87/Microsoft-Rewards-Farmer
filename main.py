@@ -4,14 +4,14 @@ import logging
 import logging.handlers as handlers
 import sys
 import time
+from datetime import date
 from pathlib import Path
 
 from src import Browser, DailySet, Login, MorePromotions, PunchCards, Searches
 from src.loggingColoredFormatter import ColoredFormatter
 from src.notifier import Notifier
-from datetime import date
 
-COOL_DOWN_HOURS = 1
+COOL_DOWN_HOURS = 0
 
 
 def main():
@@ -22,8 +22,8 @@ def main():
         loadedAccounts = setupAccounts()
         dailyProcessIsDone = [False] * len(loadedAccounts)
         startingDate = date.today()
-        logging.info(f'******************** { startingDate } ********************')
-        while (not any(dailyProcessIsDone)):
+        logging.info(f"******************** { startingDate } ********************")
+        while not any(dailyProcessIsDone):
             for i, currentAccount in enumerate(loadedAccounts):
                 try:
                     executeBot(currentAccount, notifier, args)
@@ -34,8 +34,11 @@ def main():
 
 
 def coolDownBy(hours: int):
-    logging.warning(f'******************** cooling down: {hours} hour/s ********************')
+    logging.warning(
+        f"******************** cooling down: {hours} hour/s ********************"
+    )
     time.sleep(hours * 3600)
+
 
 def setupLogging():
     format = "%(asctime)s [%(levelname)s] %(message)s"
