@@ -10,6 +10,7 @@ from selenium.webdriver.common.by import By
 
 from src.browser import Browser
 
+MAX_RETRIES = 3
 
 class Searches:
     def __init__(self, browser: Browser):
@@ -75,6 +76,7 @@ class Searches:
         return pointsCounter
 
     def bingSearch(self, word: str):
+        numOfRetries = 0
         while True:
             try:
                 self.webdriver.get("https://bing.com")
@@ -85,6 +87,10 @@ class Searches:
                 time.sleep(random.randint(self.browser.sleep - 10, self.browser.sleep + 10))
                 return self.browser.utils.getBingAccountPoints()
             except TimeoutException:
-                logging.error("[BING] " + "Timeout, retrying in 5 seconds...")
-                time.sleep(5)
-                continue
+                if numOfRetries == MAX_RETRIES:
+                    break
+                else:
+                    numOfRetries += 1
+                    logging.error(f"[BING] Timeout {numOfRetries}/{MAX_RETRIES}, retrying in 5 seconds...")
+                    time.sleep(5)
+                    continue
