@@ -13,7 +13,7 @@ from src.userAgentGenerator import GenerateUserAgent
 from src.utils import Utils
 
 
-DEFAULT_SLEEP = 100
+DEFAULT_SLEEP = 60
 class Browser:
     """WebDriver wrapper class."""
 

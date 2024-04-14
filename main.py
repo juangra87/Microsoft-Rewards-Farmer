@@ -11,7 +11,7 @@ from src import Browser, DailySet, Login, MorePromotions, PunchCards, Searches
 from src.loggingColoredFormatter import ColoredFormatter
 from src.notifier import Notifier
 
-COOL_DOWN_HOURS = 1
+COOL_DOWN_HOURS = 0
 
 
 def main():
