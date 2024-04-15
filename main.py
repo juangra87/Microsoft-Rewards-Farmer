@@ -11,7 +11,7 @@ from src import Browser, DailySet, Login, MorePromotions, PunchCards, Searches
 from src.loggingColoredFormatter import ColoredFormatter
 from src.notifier import Notifier
 
-COOL_DOWN_HOURS = 0
+COOL_DOWN_HOURS = 1
 
 
 def main():
@@ -26,19 +26,21 @@ def main():
         while not any(dailyProcessIsDone):
             for i, currentAccount in enumerate(loadedAccounts):
                 try:
-                    executeBot(currentAccount, notifier, args)
-                    dailyProcessIsDone[i] = True
+                    if dailyProcessIsDone[i] is False:
+                        executeBot(currentAccount, notifier, args)
+                        dailyProcessIsDone[i] = True
                 except Exception as e:
                     logging.exception(f"{e.__class__.__name__}: {e}")
         coolDownBy()
 
 
 def coolDownBy():
-    hoursCoolingDown = 24 - int(datetime.now().strftime("%H"))
+    hoursCoolingDown = 25 - int(datetime.now().strftime("%H"))
     logging.warning(
         f"******************** cooling down: {hoursCoolingDown} hour/s ********************"
     )
-    time.sleep(hoursCoolingDown * 3600)
+    # time.sleep(hoursCoolingDown * 3600)
+    time.sleep(COOL_DOWN_HOURS * 3600)
 
 
 def setupLogging():
