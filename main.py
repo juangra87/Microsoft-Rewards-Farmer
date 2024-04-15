@@ -4,7 +4,7 @@ import logging
 import logging.handlers as handlers
 import sys
 import time
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 from src import Browser, DailySet, Login, MorePromotions, PunchCards, Searches
@@ -30,14 +30,15 @@ def main():
                     dailyProcessIsDone[i] = True
                 except Exception as e:
                     logging.exception(f"{e.__class__.__name__}: {e}")
-        coolDownBy(COOL_DOWN_HOURS)
+        coolDownBy()
 
 
-def coolDownBy(hours: int):
+def coolDownBy():
+    hoursCoolingDown = 24 - int(datetime.now().strftime("%H"))
     logging.warning(
-        f"******************** cooling down: {hours} hour/s ********************"
+        f"******************** cooling down: {hoursCoolingDown} hour/s ********************"
     )
-    time.sleep(hours * 3600)
+    time.sleep(hoursCoolingDown * 3600)
 
 
 def setupLogging():
