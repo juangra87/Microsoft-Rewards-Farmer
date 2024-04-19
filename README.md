@@ -1,22 +1,3 @@
-![Made with Python](https://forthebadge.com/images/badges/made-with-python.svg)
-![Built by Developers](http://ForTheBadge.com/images/badges/built-by-developers.svg)
-![Uses Git](http://ForTheBadge.com/images/badges/uses-git.svg)
-![Build with Love](http://ForTheBadge.com/images/badges/built-with-love.svg)
-
-```ascii
-███╗   ███╗███████╗    ███████╗ █████╗ ██████╗ ███╗   ███╗███████╗██████╗
-████╗ ████║██╔════╝    ██╔════╝██╔══██╗██╔══██╗████╗ ████║██╔════╝██╔══██╗
-██╔████╔██║███████╗    █████╗  ███████║██████╔╝██╔████╔██║█████╗  ██████╔╝
-██║╚██╔╝██║╚════██║    ██╔══╝  ██╔══██║██╔══██╗██║╚██╔╝██║██╔══╝  ██╔══██╗
-██║ ╚═╝ ██║███████║    ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║███████╗██║  ██║
-╚═╝     ╚═╝╚══════╝    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝
-       by Charles Bel (@charlesbel)          version 3.0
-```
-
-![Maintained](https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=for-the-badge)
-![MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)
-
-## :wave: Welcome to the future of automation
 
 ### A simple bot that uses selenium to farm Microsoft Rewards written in Python
 

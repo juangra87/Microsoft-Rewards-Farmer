@@ -10,7 +10,7 @@ from selenium.webdriver.common.by import By
 
 from src.browser import Browser
 
-MAX_RETRIES = 3
+MAX_RETRIES = 5
 
 class Searches:
     def __init__(self, browser: Browser):
@@ -94,3 +94,4 @@ class Searches:
                     logging.error(f"[BING] Timeout {numOfRetries}/{MAX_RETRIES}, retrying in 5 seconds...")
                     time.sleep(5)
                     continue
+        return self.browser.utils.getBingAccountPoints()
