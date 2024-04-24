@@ -52,10 +52,15 @@ class Login:
         except Exception:  # pylint: disable=broad-except
             logging.error("[LOGIN] " + "2FA required !")
             with contextlib.suppress(Exception):
-                code = self.webdriver.find_element(
-                    By.ID, "idRemoteNGC_DisplaySign"
-                ).get_attribute("innerHTML")
-                logging.error("[LOGIN] " + f"2FA code: {code}")
+                try:
+                    code = self.webdriver.find_element(By.ID, "idRemoteNGC_DisplaySign").get_attribute("innerHTML")
+                except Exception:  # pylint: disable=broad-except
+                    code = self.webdriver.find_element(By.ID, "displaySign").get_attribute("innerHTML")
+                    with contextlib.suppress(Exception):
+                        logging.error("[LOGIN] " + f"2FA code: {code}")
+            
+            
+            logging.info("[LOGIN] " + "Waiting for 2FA code...")            
             logging.info("[LOGIN] Press enter when confirmed...")
             input()
 
