@@ -1,7 +1,6 @@
 import contextlib
 import logging
 import time
-import urllib.parse
 
 from selenium.webdriver.common.by import By
 
@@ -28,8 +27,6 @@ class Login:
         self.utils.goHome()
         points = self.utils.getAccountPoints()
 
-        logging.info("[LOGIN] " + "Ensuring login on Bing...")
-        self.checkBingLogin()
         logging.info("[LOGIN] Logged-in successfully !")
         return points
 
@@ -66,21 +63,7 @@ class Login:
         self.utils.waitUntilClickable(By.NAME, "passwd", 10)
         self.utils.waitUntilClickable(By.ID, "idSIButton9", 10)
         password = password.replace("\\", "\\\\").replace('"', '\\"')
-        self.webdriver.find_element(By.NAME,"passwd").send_keys(password)
+        self.webdriver.find_element(By.NAME, "passwd").send_keys(password)
         logging.info("[LOGIN] " + "Writing password...")
         time.sleep(3)
         self.webdriver.find_element(By.ID, "idSIButton9").click()
-
-    def checkBingLogin(self):
-        self.webdriver.get(
-            "https://www.bing.com/fd/auth/signin?action=interactive&provider=windows_live_id&return_url=https%3A%2F%2Fwww.bing.com%2F"
-        )
-        while True:
-            currentUrl = urllib.parse.urlparse(self.webdriver.current_url)
-            if currentUrl.hostname == "www.bing.com" and currentUrl.path == "/":
-                time.sleep(3)
-                self.utils.tryDismissBingCookieBanner()
-                with contextlib.suppress(Exception):
-                    if self.utils.checkBingLogin():
-                        return
-            time.sleep(1)
