@@ -59,7 +59,7 @@ class Browser:
         """Perform actions to close the browser cleanly."""
         # close web browser
         with contextlib.suppress(Exception):
-            self.webdriver.quit()
+            self.webdriver.close()
 
     def browserSetup(
         self,
