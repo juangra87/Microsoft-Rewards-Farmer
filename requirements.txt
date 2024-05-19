@@ -1,7 +1,7 @@
 requests
-selenium>=4.15.2
+selenium
 ipapi
-undetected-chromedriver==3.5.5
+undetected-chromedriver
 selenium-wire
 setuptools>=69.0.2
 blinker<1.8.0
