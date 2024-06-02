@@ -155,7 +155,12 @@ class Browser:
                 "userAgentMetadata": self.userAgentMetadata,
             },
         )
-
+        # Set timeout to something bigger that account sleep
+        timeout = self.sleep + 5
+        logging.info(
+            f'[BROWSER] Default timeout:{timeout}'
+        )
+        driver.set_page_load_timeout(timeout)
         return driver
 
     def setupProfiles(self) -> Path:
