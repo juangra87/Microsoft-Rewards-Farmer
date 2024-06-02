@@ -8,6 +8,7 @@ from pathlib import Path
 from src import Browser, DailySet, Login, MorePromotions, PunchCards, Searches
 from src.loggingColoredFormatter import ColoredFormatter
 from src.notifier import Notifier
+import shutil
 
 
 def main():
@@ -16,15 +17,17 @@ def main():
         args = argumentParser()
         notifier = Notifier(args)
         loadedAccounts = setupAccounts()
-        dailyProcessIsDone = [False] * len(loadedAccounts)
-        while not any(dailyProcessIsDone):
-            for i, currentAccount in enumerate(loadedAccounts):
-                try:
-                    if dailyProcessIsDone[i] is False:
-                        executeBot(currentAccount, notifier, args)
-                        dailyProcessIsDone[i] = True
-                except Exception as e:
-                    logging.exception(f"{e.__class__.__name__}: {e}")
+        removeSessionsFolder()
+        for i, currentAccount in enumerate(loadedAccounts):
+            try:
+                executeBot(currentAccount, notifier, args)
+            except Exception as e:
+                logging.exception(f"{e.__class__.__name__}: {e}")
+
+
+def removeSessionsFolder():
+    logging.info("Remove sessions folder")
+    shutil.rmtree('./sessions', ignore_errors=True)
 
 
 def setupLogging():
