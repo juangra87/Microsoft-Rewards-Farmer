@@ -3,15 +3,11 @@ import json
 import logging
 import logging.handlers as handlers
 import sys
-import time
-from datetime import date, datetime
 from pathlib import Path
 
 from src import Browser, DailySet, Login, MorePromotions, PunchCards, Searches
 from src.loggingColoredFormatter import ColoredFormatter
 from src.notifier import Notifier
-
-COOL_DOWN_HOURS = 1
 
 
 def main():
@@ -21,8 +17,6 @@ def main():
         notifier = Notifier(args)
         loadedAccounts = setupAccounts()
         dailyProcessIsDone = [False] * len(loadedAccounts)
-        startingDate = date.today()
-        logging.info(f"******************** {startingDate} ********************")
         while not any(dailyProcessIsDone):
             for i, currentAccount in enumerate(loadedAccounts):
                 try:
@@ -31,16 +25,6 @@ def main():
                         dailyProcessIsDone[i] = True
                 except Exception as e:
                     logging.exception(f"{e.__class__.__name__}: {e}")
-        coolDownBy()
-
-
-def coolDownBy():
-    hoursCoolingDown = 25 - int(datetime.now().strftime("%H"))
-    logging.warning(
-        f"******************** cooling down: {hoursCoolingDown} hour/s ********************"
-    )
-    # time.sleep(hoursCoolingDown * 3600)
-    time.sleep(COOL_DOWN_HOURS * 3600)
 
 
 def setupLogging():
