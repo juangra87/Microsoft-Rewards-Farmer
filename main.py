@@ -20,9 +20,16 @@ def main():
         removeSessionsFolder()
         for i, currentAccount in enumerate(loadedAccounts):
             try:
+                logStartAccount(currentAccount, i, loadedAccounts)
                 executeBot(currentAccount, notifier, args)
             except Exception as e:
                 logging.exception(f"{e.__class__.__name__}: {e}")
+
+
+def logStartAccount(currentAccount, i, loadedAccounts):
+    logging.info(f'[ACCOUNT]  ************************************************************************************')
+    logging.info(f'[ACCOUNT]  {i + 1}/{len(loadedAccounts)} - {currentAccount.get("username", "")}')
+    logging.info(f'[ACCOUNT]  ************************************************************************************')
 
 
 def removeSessionsFolder():
@@ -110,9 +117,6 @@ def setupAccounts() -> dict:
 
 
 def executeBot(currentAccount, notifier: Notifier, args: argparse.Namespace):
-    logging.info(
-        f'******************** {currentAccount.get("username", "")} ********************'
-    )
     with Browser(mobile=False, account=currentAccount, args=args) as desktopBrowser:
         accountPointsCounter = Login(desktopBrowser).login()
         startingPoints = accountPointsCounter
