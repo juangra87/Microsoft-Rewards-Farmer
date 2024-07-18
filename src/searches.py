@@ -1,52 +1,23 @@
-import json
 import logging
 import random
 import time
-from datetime import date, timedelta
+from faker import Faker
 
-import requests
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 
 from src.browser import Browser
 
 MAX_RETRIES = 3
+fake = Faker()
 
 class Searches:
     def __init__(self, browser: Browser):
         self.browser = browser
         self.webdriver = browser.webdriver
 
-    def getGoogleTrends(self, wordsCount: int) -> list:
-        searchTerms: list[str] = []
-        i = 0
-        while len(searchTerms) < wordsCount:
-            i += 1
-            r = requests.get(
-                f'https://trends.google.com/trends/api/dailytrends?hl={self.browser.localeLang}&ed={(date.today() - timedelta(days=i)).strftime("%Y%m%d")}&geo={self.browser.localeGeo}&ns=15'
-            )
-            trends = json.loads(r.text[6:])
-            for topic in trends["default"]["trendingSearchesDays"][0][
-                "trendingSearches"
-            ]:
-                searchTerms.append(topic["title"]["query"].lower())
-                searchTerms.extend(
-                    relatedTopic["query"].lower()
-                    for relatedTopic in topic["relatedQueries"]
-                )
-            searchTerms = list(set(searchTerms))
-        del searchTerms[wordsCount : (len(searchTerms) + 1)]
-        return searchTerms
-
-    def getRelatedTerms(self, word: str) -> list:
-        try:
-            r = requests.get(
-                f"https://api.bing.com/osjson.aspx?query={word}",
-                headers={"User-agent": self.browser.userAgent},
-            )
-            return r.json()[1]
-        except Exception:  # pylint: disable=broad-except
-            return []
+    def getNewSearchTerm (self) -> str:
+        return fake.name()
 
     def bingSearches(self, numberOfSearches: int, pointsCounter: int = 0):
         logging.info(
@@ -54,18 +25,11 @@ class Searches:
             + f"Starting {self.browser.browserType.capitalize()} Edge Bing searches...",
         )
 
-        i = 0
-        search_terms = self.getGoogleTrends(numberOfSearches)
-        for word in search_terms:
-            i += 1
-            logging.info("[BING] " + f"{i}/{numberOfSearches}")
-            points = self.bingSearch(word)
-            if points <= pointsCounter:
-                relatedTerms = self.getRelatedTerms(word)[:2]
-                for term in relatedTerms:
-                    points = self.bingSearch(term)
-                    if not points <= pointsCounter:
-                        break
+        for i in range(1, numberOfSearches):
+            searchTerm = self.getNewSearchTerm()
+            logging.info(f"[BING] [{i}/{numberOfSearches}] \t '{searchTerm}'")
+            points = self.bingSearch(searchTerm)
+
             if points > 0:
                 pointsCounter = points
             else:
