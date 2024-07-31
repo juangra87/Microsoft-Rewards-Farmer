@@ -5,7 +5,7 @@ import logging.handlers as handlers
 import sys
 from pathlib import Path
 
-from src import Browser, DailySet, Login, MorePromotions, PunchCards, Searches
+from src import Browser, DailySet, Login, MorePromotions, PunchCards, Searches, ReadToEarn
 from src.loggingColoredFormatter import ColoredFormatter
 from src.notifier import Notifier
 import shutil
@@ -141,6 +141,7 @@ def executeBot(currentAccount, notifier: Notifier, args: argparse.Namespace):
                 mobile=True, account=currentAccount, args=args
             ) as mobileBrowser:
                 accountPointsCounter = Login(mobileBrowser).login()
+                ReadToEarn(mobileBrowser).completeReadToEarn()
                 accountPointsCounter = Searches(mobileBrowser).bingSearches(
                     remainingSearchesM
                 )

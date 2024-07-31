@@ -73,6 +73,7 @@ class Browser:
         options.add_argument("--ignore-certificate-errors")
         options.add_argument("--ignore-certificate-errors-spki-list")
         options.add_argument("--ignore-ssl-errors")
+        options.add_argument("--disable-search-engine-choice-screen")
 
         seleniumwireOptions: dict[str, Any] = {"verify_ssl": False}
 

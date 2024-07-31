@@ -7,10 +7,13 @@ from pathlib import Path
 import logging
 
 import requests
+from requests.adapters import HTTPAdapter
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
+from requests import Session
+from urllib3 import Retry
 
 from .constants import BASE_URL
 
@@ -231,6 +234,19 @@ class Utils:
         return pylocale.format_string(
             f"%10.{num_decimals}f", number, grouping=True
         ).strip()
+
+    @staticmethod
+    def makeRequestsSession(session: Session = requests.session()) -> Session:
+        retry = Retry(
+            total=5, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504]
+        )
+        session.mount(
+            "https://", HTTPAdapter(max_retries=retry)
+        )  # See https://stackoverflow.com/a/35504626/4164390 to finetune
+        session.mount(
+            "http://", HTTPAdapter(max_retries=retry)
+        )  # See https://stackoverflow.com/a/35504626/4164390 to finetune
+        return session
 
     @staticmethod
     def getBrowserConfig(sessionPath: Path) -> dict:
