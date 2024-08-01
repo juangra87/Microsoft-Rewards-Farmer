@@ -5,3 +5,4 @@ undetected-chromedriver
 selenium-wire
 setuptools>=69.0.2
 blinker<1.8.0
+Faker
