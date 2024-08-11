@@ -29,6 +29,9 @@ class Searches:
             searchTerm = self.getNewSearchTerm()
             logging.info(f"[BING] [{i}/{numberOfSearches}] \t '{searchTerm}'")
             self.bingSearch(searchTerm)
+            if i > 5:
+                logging.warning(f"[BING] As a measure to avoid bans, searches are limited to batches of 5")
+                break
         logging.info(
             f"[BING] Finished {self.browser.browserType.capitalize()} Edge Bing searches !"
         )
