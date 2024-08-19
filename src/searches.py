@@ -28,7 +28,7 @@ class Searches:
         for i in range(1, numberOfSearches + 1):
             searchTerm = self.getNewSearchTerm()
             logging.info(f"[BING] [{i}/{numberOfSearches}] \t '{searchTerm}'")
-            self.bingSearch(searchTerm)
+            pointsCounter = self.bingSearch(searchTerm)
         logging.info(
             f"[BING] Finished {self.browser.browserType.capitalize()} Edge Bing searches !"
         )

@@ -140,7 +140,7 @@ def executeBot(currentAccount, notifier: Notifier, args: argparse.Namespace):
             with Browser(
                 mobile=True, account=currentAccount, args=args
             ) as mobileBrowser:
-                accountPointsCounter = Login(mobileBrowser).login()
+                Login(mobileBrowser).login()
                 ReadToEarn(mobileBrowser).completeReadToEarn()
                 accountPointsCounter = Searches(mobileBrowser).bingSearches(
                     remainingSearchesM
