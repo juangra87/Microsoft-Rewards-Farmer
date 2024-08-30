@@ -1,5 +1,7 @@
+import logging
 import random
 import time
+from time import sleep
 
 from selenium.webdriver.common.by import By
 
@@ -19,10 +21,12 @@ class Activities:
         self.browser.utils.switch_to_new_tab(8)
 
     def open_more_promotions_activity(self, card_id: int):
-        self.webdriver.find_element(
+        element = self.webdriver.find_element(
             By.XPATH,
             f'//*[@id="more-activities"]/div/mee-card[{card_id}]/div/card-content/mee-rewards-more-activities-card-item/div/a',
-        ).click()
+        )
+        logging.info(f"[MORE PROMOS] {element.text}")
+        element.click()
         self.browser.utils.switch_to_new_tab(8)
 
     def complete_search(self):

@@ -4,6 +4,8 @@ from src.browser import Browser
 
 from .activities import Activities
 
+MORE_PROMOS_PREFIX = "[MORE PROMOS] "
+
 
 class MorePromotions:
     def __init__(self, browser: Browser):
@@ -12,7 +14,7 @@ class MorePromotions:
 
     def complete_more_promotions(self):
         # Function to complete More Promotions
-        logging.info("[MORE PROMOS] " + "Trying to complete More Promotions...")
+        logging.info(f"{MORE_PROMOS_PREFIX}Trying to complete More Promotions...")
         self.browser.utils.go_home()
         more_promotions = self.browser.utils.get_dashboard_data()["morePromotions"]
         i = 0
@@ -39,7 +41,7 @@ class MorePromotions:
             except Exception:  # pylint: disable=broad-except
                 # Reset tabs in case of an exception
                 self.browser.utils.reset_tabs()
-        logging.info("[MORE PROMOS] Completed More Promotions successfully !")
+        logging.info(f"{MORE_PROMOS_PREFIX}Completed More Promotions successfully !")
 
     def complete_point_progress_quizzes(self, promotion):
         # Complete different types of quizzes based on point progress max
