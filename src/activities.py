@@ -49,42 +49,49 @@ class Activities:
         number_of_options = self.webdriver.execute_script(
             "return _w.rewardsQuizRenderInfo.numberOfOptions"
         )
-        for question in range(number_of_questions):
-            if number_of_options == 8:
-                answers = []
-                for i in range(number_of_options):
-                    is_correct_option = self.webdriver.find_element(
-                        By.ID, f"rqAnswerOption{i}"
-                    ).get_attribute("iscorrectoption")
-                    if is_correct_option and is_correct_option.lower() == "true":
-                        answers.append(f"rqAnswerOption{i}")
-                for answer in answers:
-                    self.webdriver.find_element(By.ID, answer).click()
-                    time.sleep(5)
-                    if not self.browser.utils.wait_until_question_refresh():
-                        self.browser.utils.reset_tabs()
-                        return
-            elif number_of_options in [2, 3, 4]:
-                correct_option = self.webdriver.execute_script(
-                    "return _w.rewardsQuizRenderInfo.correctAnswer"
-                )
-                for i in range(number_of_options):
-                    if (
-                        self.webdriver.find_element(
-                            By.ID, f"rqAnswerOption{i}"
-                        ).get_attribute("data-option")
-                        == correct_option
-                    ):
-                        self.webdriver.find_element(By.ID, f"rqAnswerOption{i}").click()
-                        time.sleep(5)
-                        if not self.browser.utils.wait_until_question_refresh():
-                            self.browser.utils.reset_tabs()
-                            return
-                        break
-            if question + 1 != number_of_questions:
-                time.sleep(5)
+        self.complete_questions(number_of_options, number_of_questions)
         time.sleep(5)
         self.browser.utils.close_current_tab()
+
+    def complete_questions(self, number_of_options, number_of_questions):
+        for question in range(number_of_questions):
+            if number_of_options == 8:
+                self.complete_eight_options_questions(number_of_options)
+            elif number_of_options in [2, 3, 4]:
+                self.complete_two_to_four_questions(number_of_options)
+            if question + 1 != number_of_questions:
+                time.sleep(5)
+
+    def complete_two_to_four_questions(self, number_of_options):
+        correct_option = self.webdriver.execute_script(
+            "return _w.rewardsQuizRenderInfo.correctAnswer"
+        )
+        for i in range(number_of_options):
+            if (
+                    self.webdriver.find_element(
+                        By.ID, f"rqAnswerOption{i}"
+                    ).get_attribute("data-option")
+                    == correct_option
+            ):
+                self.webdriver.find_element(By.ID, f"rqAnswerOption{i}").click()
+                time.sleep(5)
+                if not self.browser.utils.wait_until_question_refresh():
+                    self.browser.utils.reset_tabs()
+                break
+
+    def complete_eight_options_questions(self, number_of_options):
+        answers = []
+        for i in range(number_of_options):
+            is_correct_option = self.webdriver.find_element(
+                By.ID, f"rqAnswerOption{i}"
+            ).get_attribute("iscorrectoption")
+            if is_correct_option and is_correct_option.lower() == "true":
+                answers.append(f"rqAnswerOption{i}")
+        for answer in answers:
+            self.webdriver.find_element(By.ID, answer).click()
+            time.sleep(5)
+            if not self.browser.utils.wait_until_question_refresh():
+                self.browser.utils.reset_tabs()
 
     def complete_abc(self):
         counter = self.webdriver.find_element(
