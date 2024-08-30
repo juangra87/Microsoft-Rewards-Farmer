@@ -16,40 +16,40 @@ class Searches:
         self.browser = browser
         self.webdriver = browser.webdriver
 
-    def getNewSearchTerm (self) -> str:
+    def get_new_search_term (self) -> str:
         return fake.name()
 
-    def bingSearches(self, numberOfSearches: int, pointsCounter: int = 0):
+    def bing_searches(self, number_of_searches: int, points_counter: int = 0):
         logging.info(
             "[BING] "
-            + f"Starting {self.browser.browserType.capitalize()} Edge Bing searches...",
+            + f"Starting {self.browser.browser_type.capitalize()} Edge Bing searches...",
         )
 
-        for i in range(1, numberOfSearches + 1):
-            searchTerm = self.getNewSearchTerm()
-            logging.info(f"[BING] [{i}/{numberOfSearches}] \t '{searchTerm}'")
-            pointsCounter = self.bingSearch(searchTerm)
+        for i in range(1, number_of_searches + 1):
+            search_term = self.get_new_search_term()
+            logging.info(f"[BING] [{i}/{number_of_searches}] \t '{search_term}'")
+            points_counter = self.bing_search(search_term)
         logging.info(
-            f"[BING] Finished {self.browser.browserType.capitalize()} Edge Bing searches !"
+            f"[BING] Finished {self.browser.browser_type.capitalize()} Edge Bing searches !"
         )
-        return pointsCounter
+        return points_counter
 
-    def bingSearch(self, word: str):
-        numOfRetries = 0
+    def bing_search(self, word: str):
+        num_of_retries = 0
         while True:
             try:
                 self.webdriver.get("https://bing.com")
-                self.browser.utils.waitUntilClickable(By.ID, "sb_form_q")
+                self.browser.utils.wait_until_clickable(By.ID, "sb_form_q")
                 searchbar = self.webdriver.find_element(By.ID, "sb_form_q")
                 searchbar.send_keys(word)
                 searchbar.submit()
                 time.sleep(random.randint(self.browser.sleep - 10, self.browser.sleep + 10))
-                return self.browser.utils.getBingAccountPoints()
+                return self.browser.utils.get_bing_account_points()
             except TimeoutException:
-                if numOfRetries == MAX_RETRIES:
+                if num_of_retries == MAX_RETRIES:
                     break
                 else:
-                    numOfRetries += 1
-                    logging.error(f"[BING] Timeout {numOfRetries}/{MAX_RETRIES}, retrying in 5 seconds...")
+                    num_of_retries += 1
+                    logging.error(f"[BING] Timeout {num_of_retries}/{MAX_RETRIES}, retrying in 5 seconds...")
                     time.sleep(5)
                     continue

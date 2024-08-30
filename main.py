@@ -52,7 +52,6 @@ def log_account_status(loaded_accounts, accounts_done):
 
 def bot_pause():
     tomorrow_date = datetime.now() + timedelta(hours=3)
-    # tomorrowDate = tomorrowDate.replace(hour=2, minute=00, second=0, microsecond=0)
     logging.warning(f'[BOT STATUS] ////////////////////  Pause until {tomorrow_date}  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n\n')
     pause.until(tomorrow_date)
 
@@ -156,36 +155,36 @@ def execute_bot(current_account, notifier: Notifier, args: argparse.Namespace):
         account_points_counter = Login(desktopBrowser).login()
         starting_points = account_points_counter
         logging.info(
-            f"[POINTS] You have {desktopBrowser.utils.formatNumber(account_points_counter)} points on your account !"
+            f"[POINTS] You have {desktopBrowser.utils.format_number(account_points_counter)} points on your account !"
         )
-        DailySet(desktopBrowser).completeDailySet()
-        PunchCards(desktopBrowser).completePunchCards()
-        MorePromotions(desktopBrowser).completeMorePromotions()
+        DailySet(desktopBrowser).complete_daily_set()
+        PunchCards(desktopBrowser).complete_punch_cards()
+        MorePromotions(desktopBrowser).complete_more_promotions()
         (
             remaining_searches,
             remaining_searches_m,
-        ) = desktopBrowser.utils.getRemainingSearches()
+        ) = desktopBrowser.utils.get_remaining_searches()
         if remaining_searches != 0:
-            account_points_counter = Searches(desktopBrowser).bingSearches(
+            account_points_counter = Searches(desktopBrowser).bing_searches(
                 remaining_searches
             )
 
         if remaining_searches_m != 0:
-            desktopBrowser.closeBrowser()
+            desktopBrowser.close_browser()
             with Browser(
                 mobile=True, account=current_account, args=args
             ) as mobileBrowser:
                 Login(mobileBrowser).login()
-                ReadToEarn(mobileBrowser).completeReadToEarn()
-                account_points_counter = Searches(mobileBrowser).bingSearches(
+                ReadToEarn(mobileBrowser).complete_read_to_earn()
+                account_points_counter = Searches(mobileBrowser).bing_searches(
                     remaining_searches_m
                 )
-        points_earned = desktopBrowser.utils.formatNumber(account_points_counter - starting_points)
+        points_earned = desktopBrowser.utils.format_number(account_points_counter - starting_points)
         logging.info(
             f"[POINTS] You have earned {points_earned} points today !"
         )
         logging.info(
-            f"[POINTS] You are now at {desktopBrowser.utils.formatNumber(account_points_counter)} points !\n"
+            f"[POINTS] You are now at {desktopBrowser.utils.format_number(account_points_counter)} points !\n"
         )
 
         notifier.send(
@@ -193,8 +192,8 @@ def execute_bot(current_account, notifier: Notifier, args: argparse.Namespace):
                 [
                     "Microsoft Rewards Farmer",
                     f"Account: {current_account.get('username', '')}",
-                    f"Points earned today: {desktopBrowser.utils.formatNumber(account_points_counter - starting_points)}",
-                    f"Total points: {desktopBrowser.utils.formatNumber(account_points_counter)}",
+                    f"Points earned today: {desktopBrowser.utils.format_number(account_points_counter - starting_points)}",
+                    f"Total points: {desktopBrowser.utils.format_number(account_points_counter)}",
                 ]
             )
         )

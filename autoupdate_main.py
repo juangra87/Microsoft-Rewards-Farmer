@@ -8,7 +8,7 @@ import requests
 
 def update(version: str):
     url = "https://github.com/charlesbel/Microsoft-Rewards-Farmer/archive/refs/heads/master.zip"
-    folderName = "Microsoft-Rewards-Farmer-master"
+    folder_name = "Microsoft-Rewards-Farmer-master"
     with open(".gitignore", "r") as f:
         exclusions = f.read().splitlines()
         exclusions = [e for e in exclusions if e != "" and not e.startswith("#")] + [
@@ -19,8 +19,8 @@ def update(version: str):
     for root, dirs, files in os.walk(".", topdown=False):
         for name in files:
             path = os.path.join(root, name)
-            relativePath = path[2:]
-            if not relativePath.startswith(tuple(exclusions)):
+            relative_path = path[2:]
+            if not relative_path.startswith(tuple(exclusions)):
                 os.remove(path)
     print("Downloading...")
     r = requests.get(url)
@@ -30,22 +30,22 @@ def update(version: str):
         files = [
             f
             for f in zipObj.namelist()
-            if f.startswith(folderName) and not f.endswith("/")
+            if f.startswith(folder_name) and not f.endswith("/")
         ]
         for file in files:
-            newName = file.replace(f"{folderName}/", "")
-            dirName = os.path.dirname(newName)
-            if "/" in newName and not os.path.exists(dirName):
-                print(f"Creating folder {dirName}...")
-                os.makedirs(dirName)
-            with zipObj.open(file) as src, open(newName, "wb") as dst:
+            new_name = file.replace(f"{folder_name}/", "")
+            dir_name = os.path.dirname(new_name)
+            if "/" in new_name and not os.path.exists(dir_name):
+                print(f"Creating folder {dir_name}...")
+                os.makedirs(dir_name)
+            with zipObj.open(file) as src, open(new_name, "wb") as dst:
                 dst.write(src.read())
-    with open("version.txt", "w") as f:
+    with open('version.txt', "w") as f:
         f.write(version)
     print("Done !")
 
 
-def getCurrentVersion():
+def get_current_version():
     if os.path.exists("version.txt"):
         with open("version.txt", "r") as f:
             version = f.read()
@@ -53,7 +53,7 @@ def getCurrentVersion():
     return None
 
 
-def getLatestVersion():
+def get_latest_version():
     r = requests.get(
         "https://api.github.com/repos/charlesbel/Microsoft-Rewards-Farmer/commits/master"
     )
@@ -61,8 +61,8 @@ def getLatestVersion():
 
 
 if __name__ == "__main__":
-    currentVersion = getCurrentVersion()
-    latestVersion = getLatestVersion()
+    currentVersion = get_current_version()
+    latestVersion = get_latest_version()
     if currentVersion != latestVersion:
         print("New version available !")
         update(latestVersion)
