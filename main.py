@@ -1,7 +1,9 @@
 import argparse
 import json
+import locale
 import logging
 import logging.handlers as handlers
+import math
 import sys
 from pathlib import Path
 
@@ -38,7 +40,7 @@ def execute_bot_if_proceeds(account, accounts_done, args, i, loaded_accounts, no
     if not accounts_done[i]:
         log_start_account(account, i, loaded_accounts)
         points_earned = execute_bot(account, notifier, args)
-        if float(points_earned) == float(0):
+        if math.isclose(locale.atof(points_earned) , 0.0,rel_tol=0.1, abs_tol=0.1):
             accounts_done[i] = True
         log_account_status(loaded_accounts, accounts_done)
 

@@ -25,7 +25,7 @@ class Activities:
             By.XPATH,
             f'//*[@id="more-activities"]/div/mee-card[{card_id}]/div/card-content/mee-rewards-more-activities-card-item/div/a',
         )
-        logging.info(f"[MORE PROMOS] {element.text}")
+        logging.debug(f"[MORE PROMOS] {element.text}")
         element.click()
         self.browser.utils.switch_to_new_tab(8)
 
