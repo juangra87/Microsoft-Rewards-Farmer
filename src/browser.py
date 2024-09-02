@@ -13,13 +13,13 @@ from src.userAgentGenerator import GenerateUserAgent
 from src.utils import Utils
 
 
-DEFAULT_SLEEP = 100
+DEFAULT_SLEEP = 180
 class Browser:
     """WebDriver wrapper class."""
 
     def __init__(self, mobile: bool, account, args: Any) -> None:
         self.mobile = mobile
-        self.browserType = "mobile" if mobile else "desktop"
+        self.browser_type = "mobile" if mobile else "desktop"
         self.headless = not args.visible
         self.username = account["username"]
         self.password = account["password"]
@@ -30,44 +30,44 @@ class Browser:
         logging.info(
             f'[BROWSER] { self.sleep } seconds between searches '
         )
-        self.localeLang, self.localeGeo = self.getCCodeLang(args.lang, args.geo)
+        self.locale_lang, self.locale_geo = self.get_c_code_lang(args.lang, args.geo)
         self.proxy = None
         if args.proxy:
             self.proxy = args.proxy
         elif account.get("proxy"):
             self.proxy = account["proxy"]
-        self.userDataDir = self.setupProfiles()
-        self.browserConfig = Utils.getBrowserConfig(self.userDataDir)
+        self.user_data_dir = self.setup_profiles()
+        self.browser_config = Utils.get_browser_config(self.user_data_dir)
         (
-            self.userAgent,
-            self.userAgentMetadata,
-            newBrowserConfig,
-        ) = GenerateUserAgent().userAgent(self.browserConfig, mobile)
-        if newBrowserConfig:
-            self.browserConfig = newBrowserConfig
-            Utils.saveBrowserConfig(self.userDataDir, self.browserConfig)
-        self.webdriver = self.browserSetup()
+            self.user_agent,
+            self.user_agent_metadata,
+            new_browser_config,
+        ) = GenerateUserAgent().user_agent(self.browser_config, mobile)
+        if new_browser_config:
+            self.browser_config = new_browser_config
+            Utils.save_browser_config(self.user_data_dir, self.browser_config)
+        self.webdriver = self.browser_setup()
         self.utils = Utils(self.webdriver)
 
     def __enter__(self) -> "Browser":
         return self
 
     def __exit__(self, *args: Any) -> None:
-        self.closeBrowser()
+        self.close_browser()
 
-    def closeBrowser(self) -> None:
+    def close_browser(self) -> None:
         """Perform actions to close the browser cleanly."""
         # close web browser
         with contextlib.suppress(Exception):
             self.webdriver.close()
             self.webdriver.quit()
 
-    def browserSetup(
+    def browser_setup(
         self,
     ) -> WebDriver:
         options = webdriver.ChromeOptions()
         options.headless = self.headless
-        options.add_argument(f"--lang={self.localeLang}")
+        options.add_argument(f"--lang={self.locale_lang}")
         options.add_argument("--log-level=3")
 
         options.add_argument("--ignore-certificate-errors")
@@ -75,10 +75,10 @@ class Browser:
         options.add_argument("--ignore-ssl-errors")
         options.add_argument("--disable-search-engine-choice-screen")
 
-        seleniumwireOptions: dict[str, Any] = {"verify_ssl": False}
+        selenium_options: dict[str, Any] = {"verify_ssl": False}
 
         if self.proxy:
-            seleniumwireOptions["proxy"] = {
+            selenium_options["proxy"] = {
                 "http": self.proxy,
                 "https": self.proxy,
                 "no_proxy": "localhost,127.0.0.1",
@@ -86,38 +86,38 @@ class Browser:
 
         driver = webdriver.Chrome(
             options=options,
-            seleniumwire_options=seleniumwireOptions,
-            user_data_dir=self.userDataDir.as_posix(),
+            seleniumwire_options=selenium_options,
+            user_data_dir=self.user_data_dir.as_posix(),
         )
 
-        seleniumLogger = logging.getLogger("seleniumwire")
-        seleniumLogger.setLevel(logging.ERROR)
+        selenium_logger = logging.getLogger("seleniumwire")
+        selenium_logger.setLevel(logging.ERROR)
 
-        if self.browserConfig.get("sizes"):
-            deviceHeight = self.browserConfig["sizes"]["height"]
-            deviceWidth = self.browserConfig["sizes"]["width"]
+        if self.browser_config.get("sizes"):
+            device_height = self.browser_config["sizes"]["height"]
+            device_width = self.browser_config["sizes"]["width"]
         else:
             if self.mobile:
-                deviceHeight = random.randint(568, 1024)
-                deviceWidth = random.randint(320, min(576, int(deviceHeight * 0.7)))
+                device_height = random.randint(568, 1024)
+                device_width = random.randint(320, min(576, int(device_height * 0.7)))
             else:
-                deviceWidth = random.randint(1024, 2560)
-                deviceHeight = random.randint(768, min(1440, int(deviceWidth * 0.8)))
-            self.browserConfig["sizes"] = {
-                "height": deviceHeight,
-                "width": deviceWidth,
+                device_width = random.randint(1024, 2560)
+                device_height = random.randint(768, min(1440, int(device_width * 0.8)))
+            self.browser_config["sizes"] = {
+                "height": device_height,
+                "width": device_width,
             }
-            Utils.saveBrowserConfig(self.userDataDir, self.browserConfig)
+            Utils.save_browser_config(self.user_data_dir, self.browser_config)
 
         if self.mobile:
-            screenHeight = deviceHeight + 146
-            screenWidth = deviceWidth
+            screen_height = device_height + 146
+            screen_width = device_width
         else:
-            screenWidth = deviceWidth + 55
-            screenHeight = deviceHeight + 151
+            screen_width = device_width + 55
+            screen_height = device_height + 151
 
-        logging.info(f"Screen size: {screenWidth}x{screenHeight}")
-        logging.info(f"Device size: {deviceWidth}x{deviceHeight}")
+        logging.info(f"Screen size: {screen_width}x{screen_height}")
+        logging.info(f"Device size: {device_width}x{device_height}")
 
         if self.mobile:
             driver.execute_cdp_cmd(
@@ -130,19 +130,19 @@ class Browser:
         driver.execute_cdp_cmd(
             "Emulation.setDeviceMetricsOverride",
             {
-                "width": deviceWidth,
-                "height": deviceHeight,
+                "width": device_width,
+                "height": device_height,
                 "deviceScaleFactor": 0,
                 "mobile": self.mobile,
-                "screenWidth": screenWidth,
-                "screenHeight": screenHeight,
+                "screenWidth": screen_width,
+                "screenHeight": screen_height,
                 "positionX": 0,
                 "positionY": 0,
                 "viewport": {
                     "x": 0,
                     "y": 0,
-                    "width": deviceWidth,
-                    "height": deviceHeight,
+                    "width": device_width,
+                    "height": device_height,
                     "scale": 1,
                 },
             },
@@ -151,9 +151,9 @@ class Browser:
         driver.execute_cdp_cmd(
             "Emulation.setUserAgentOverride",
             {
-                "userAgent": self.userAgent,
-                "platform": self.userAgentMetadata["platform"],
-                "userAgentMetadata": self.userAgentMetadata,
+                "userAgent": self.user_agent,
+                "platform": self.user_agent_metadata["platform"],
+                "userAgentMetadata": self.user_agent_metadata,
             },
         )
         # Set timeout to something bigger that account sleep
@@ -164,7 +164,7 @@ class Browser:
         driver.set_page_load_timeout(timeout)
         return driver
 
-    def setupProfiles(self) -> Path:
+    def setup_profiles(self) -> Path:
         """
         Sets up the sessions profile for the chrome browser.
         Uses the username to create a unique profile for the session.
@@ -172,16 +172,16 @@ class Browser:
         Returns:
             Path
         """
-        currentPath = Path(__file__)
-        parent = currentPath.parent.parent
-        sessionsDir = parent / "sessions"
+        current_path = Path(__file__)
+        parent = current_path.parent.parent
+        sessions_dir = parent / "sessions"
 
-        sessionUuid = uuid.uuid5(uuid.NAMESPACE_DNS, self.username)
-        sessionsDir = sessionsDir / str(sessionUuid) / self.browserType
-        sessionsDir.mkdir(parents=True, exist_ok=True)
-        return sessionsDir
+        session_uuid = uuid.uuid5(uuid.NAMESPACE_DNS, self.username)
+        sessions_dir = sessions_dir / str(session_uuid) / self.browser_type
+        sessions_dir.mkdir(parents=True, exist_ok=True)
+        return sessions_dir
 
-    def getCCodeLang(self, lang: str, geo: str) -> tuple:
+    def get_c_code_lang(self, lang: str, geo: str) -> tuple:
         if lang is None or geo is None:
             try:
                 nfo = ipapi.location()

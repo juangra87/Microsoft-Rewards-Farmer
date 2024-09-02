@@ -29,9 +29,9 @@ class GenerateUserAgent:
     OS_PLATFORMS = {"win": "Windows NT 10.0", "android": "Linux"}
     OS_CPUS = {"win": "Win64; x64", "android": "Android 10"}
 
-    def userAgent(
+    def user_agent(
         self,
-        browserConfig: dict[str, Any],
+        browser_config: dict[str, Any],
         mobile: bool = False,
     ) -> tuple[str, dict[str, Any], Any]:
         """
@@ -44,29 +44,29 @@ class GenerateUserAgent:
             A string containing the user agent for the specified device.
         """
 
-        system = self.getSystemComponents(mobile)
-        app = self.getAppComponents(mobile)
-        uaTemplate = (
+        system = self.get_system_components(mobile)
+        app = self.get_app_components(mobile)
+        ua_template = (
             self.USER_AGENT_TEMPLATES.get("edge_mobile", "")
             if mobile
             else self.USER_AGENT_TEMPLATES.get("edge_pc", "")
         )
 
-        newBrowserConfig = None
-        userAgentMetadata = browserConfig.get("userAgentMetadata")
-        if not userAgentMetadata:
+        new_browser_config = None
+        user_agent_metadata = browser_config.get("userAgentMetadata")
+        if not user_agent_metadata:
             # ref : https://textslashplain.com/2021/09/21/determining-os-platform-version/
-            platformVersion = (
+            platform_version = (
                 f"{random.randint(9,13) if mobile else random.randint(1,15)}.0.0"
             )
-            newBrowserConfig = browserConfig
-            newBrowserConfig["userAgentMetadata"] = {
-                "platformVersion": platformVersion,
+            new_browser_config = browser_config
+            new_browser_config["userAgentMetadata"] = {
+                "platformVersion": platform_version,
             }
         else:
-            platformVersion = userAgentMetadata["platformVersion"]
+            platform_version = user_agent_metadata["platformVersion"]
 
-        uaMetadata = {
+        ua_metadata = {
             "mobile": mobile,
             "platform": "Android" if mobile else "Windows",
             "fullVersionList": [
@@ -79,15 +79,15 @@ class GenerateUserAgent:
                 {"brand": "Microsoft Edge", "version": app["edge_major_version"]},
                 {"brand": "Chromium", "version": app["chrome_major_version"]},
             ],
-            "platformVersion": platformVersion,
+            "platformVersion": platform_version,
             "architecture": "" if mobile else "x86",
             "bitness": "" if mobile else "64",
             "model": "",
         }
 
-        return uaTemplate.format(system=system, app=app), uaMetadata, newBrowserConfig
+        return ua_template.format(system=system, app=app), ua_metadata, new_browser_config
 
-    def getSystemComponents(self, mobile: bool) -> str:
+    def get_system_components(self, mobile: bool) -> str:
         """
         Generates the system components for the user agent string.
 
@@ -97,59 +97,59 @@ class GenerateUserAgent:
         Returns:
             A string containing the system components for the user agent string.
         """
-        osId = self.OS_CPUS.get("android") if mobile else self.OS_CPUS.get("win")
-        uaPlatform = (
+        os_id = self.OS_CPUS.get("android") if mobile else self.OS_CPUS.get("win")
+        ua_platform = (
             self.OS_PLATFORMS.get("android") if mobile else self.OS_PLATFORMS.get("win")
         )
         if mobile:
-            osId = f"{osId}; {self.MOBILE_DEVICE}"
-        return f"{uaPlatform}; {osId}"
+            os_id = f"{os_id}; {self.MOBILE_DEVICE}"
+        return f"{ua_platform}; {os_id}"
 
-    def getAppComponents(self, mobile: bool) -> dict[str, str]:
+    def get_app_components(self, mobile: bool) -> dict[str, str]:
         """
         Generates the application components for the user agent string.
 
         Returns:
             A dictionary containing the application components for the user agent string.
         """
-        edgeWindowsVersion, edgeAndroidVersion = self.getEdgeVersions()
-        edgeVersion = edgeAndroidVersion if mobile else edgeWindowsVersion
-        edgeMajorVersion = edgeVersion.split(".")[0]
+        edge_windows_version, edge_android_version = self.get_edge_versions()
+        edge_version = edge_android_version if mobile else edge_windows_version
+        edge_major_version = edge_version.split(".")[0]
 
-        chromeVersion = self.getChromeVersion()
-        chromeMajorVersion = chromeVersion.split(".")[0]
-        chromeReducedVersion = f"{chromeMajorVersion}.0.0.0"
+        chrome_version = self.get_chrome_version()
+        chrome_major_version = chrome_version.split(".")[0]
+        chrome_reduced_version = f"{chrome_major_version}.0.0.0"
 
         return {
-            "edge_version": edgeVersion,
-            "edge_major_version": edgeMajorVersion,
-            "chrome_version": chromeVersion,
-            "chrome_major_version": chromeMajorVersion,
-            "chrome_reduced_version": chromeReducedVersion,
+            "edge_version": edge_version,
+            "edge_major_version": edge_major_version,
+            "chrome_version": chrome_version,
+            "chrome_major_version": chrome_major_version,
+            "chrome_reduced_version": chrome_reduced_version,
         }
 
-    def getEdgeVersions(self) -> tuple[str, str]:
+    def get_edge_versions(self) -> tuple[str, str]:
         """
         Get the latest version of Microsoft Edge.
 
         Returns:
             str: The latest version of Microsoft Edge.
         """
-        response = self.getWebdriverPage(
+        response = self.get_webdriver_page(
             "https://edgeupdates.microsoft.com/api/products"
         )
         data = response.json()
-        stableProduct = next(
+        stable_product = next(
             (product for product in data if product["Product"] == "Stable"),
             None,
         )
-        if stableProduct:
-            releases = stableProduct["Releases"]
-            androidRelease = next(
+        if stable_product:
+            releases = stable_product["Releases"]
+            android_release = next(
                 (release for release in releases if release["Platform"] == "Android"),
                 None,
             )
-            windowsRelease = next(
+            windows_release = next(
                 (
                     release
                     for release in releases
@@ -158,28 +158,28 @@ class GenerateUserAgent:
                 ),
                 None,
             )
-            if androidRelease and windowsRelease:
+            if android_release and windows_release:
                 return (
-                    windowsRelease["ProductVersion"],
-                    androidRelease["ProductVersion"],
+                    windows_release["ProductVersion"],
+                    android_release["ProductVersion"],
                 )
         raise HTTPError("Failed to get Edge versions.")
 
-    def getChromeVersion(self) -> str:
+    def get_chrome_version(self) -> str:
         """
         Get the latest version of Google Chrome.
 
         Returns:
             str: The latest version of Google Chrome.
         """
-        response = self.getWebdriverPage(
+        response = self.get_webdriver_page(
             "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json"
         )
         data = response.json()
         return data["channels"]["Stable"]["version"]
 
     @staticmethod
-    def getWebdriverPage(url: str) -> Response:
+    def get_webdriver_page(url: str) -> Response:
         response = None
         response = requests.get(url)
         if response.status_code != requests.codes.ok:  # pylint: disable=no-member

@@ -21,11 +21,11 @@ class ReadToEarn:
         self.webdriver = browser.webdriver
         self.activities = Activities(browser)
 
-    def completeReadToEarn(self):
+    def complete_read_to_earn(self):
 
         logging.info("[READ TO EARN] " + "Trying to complete Read to Earn...")
 
-        accountName = self.browser.username
+        account_name = self.browser.username
 
         # Should Really Cache Token and load it in.
         # To Save token
@@ -39,26 +39,26 @@ class ReadToEarn:
         # Use Webdriver to get OAuth2 Token
         # This works, since you already logged into Bing, so no user interaction needed
 
-        mobileApp = Utils.makeRequestsSession(OAuth2Session(client_id, scope=scope, redirect_uri=redirect_uri))
-        authorization_url, state = mobileApp.authorization_url(authorization_base_url, access_type="offline_access", login_hint=accountName)
+        mobile_app = Utils.make_requests_session(OAuth2Session(client_id, scope=scope, redirect_uri=redirect_uri))
+        authorization_url, _ = mobile_app.authorization_url(authorization_base_url, access_type="offline_access", login_hint=account_name)
 
         # Get Referer URL from webdriver
         self.webdriver.get(authorization_url)
         while True:
             logging.info("[READ TO EARN] Waiting for Login")
-            if self.webdriver.current_url[:48] == "https://login.live.com/oauth20_desktop.srf?code=":
+            if self.webdriver.current_url.startswith("https://login.live.com/oauth20_desktop.srf?code="):
                 redirect_response = self.webdriver.current_url
                 break
             time.sleep(1)
 
         logging.info("[READ TO EARN] Logged-in successfully !")
         # Use returned URL to create a token
-        token = mobileApp.fetch_token(token_url, authorization_response=redirect_response,include_client_id=True)
+        mobile_app.fetch_token(token_url, authorization_response=redirect_response, include_client_id=True)
 
         # Do Daily Check in
         json_data = {
             'amount': 1,
-            'country': self.browser.localeGeo.lower(),
+            'country': self.browser.locale_geo.lower(),
             'id': 1,
             'type': 101,
             'attributes': {
@@ -67,14 +67,14 @@ class ReadToEarn:
         }
         json_data['id'] = secrets.token_hex(64)
         logging.info("[READ TO EARN] Daily App Check In")
-        r = mobileApp.post("https://prod.rewardsplatform.microsoft.com/dapi/me/activities",json=json_data)
+        r = mobile_app.post("https://prod.rewardsplatform.microsoft.com/dapi/me/activities",json=json_data)
         balance = r.json().get("response").get("balance")
         time.sleep(random.randint(10, 20))
 
         # json data to confirm an article is read
         json_data = {
             'amount': 1,
-            'country': self.browser.localeGeo.lower(),
+            'country': self.browser.locale_geo.lower(),
             'id': 1,
             'type': 101,
             'attributes': {
@@ -86,7 +86,7 @@ class ReadToEarn:
         for i in range(10):
             # Replace ID with a random value so get credit for a new article
             json_data['id'] = secrets.token_hex(64)
-            r = mobileApp.post("https://prod.rewardsplatform.microsoft.com/dapi/me/activities",json=json_data)
+            r = mobile_app.post("https://prod.rewardsplatform.microsoft.com/dapi/me/activities",json=json_data)
             newbalance = r.json().get("response").get("balance")
             if newbalance == balance:
                 logging.info("[READ TO EARN] Read All Available Articles !")
