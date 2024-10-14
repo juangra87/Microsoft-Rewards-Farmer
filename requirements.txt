@@ -1,4 +1,5 @@
 requests
+requests_oauthlib
 selenium
 ipapi
 undetected-chromedriver
