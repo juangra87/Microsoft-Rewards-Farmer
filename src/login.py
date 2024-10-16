@@ -60,7 +60,6 @@ class Login:
                 ).get_attribute("innerHTML")
                 logging.error(logger_prefix + f"2FA code: {code}")
             logging.info("[LOGIN] Press enter when confirmed...")
-            input()
 
         self.utils.try_dismiss_all_messages()
         time.sleep(1)
