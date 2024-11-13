@@ -7,7 +7,7 @@ on:
 
 jobs:
   docker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       -
         name: Checkout
@@ -31,4 +31,4 @@ jobs:
           context: .
           push: true
           tags: juangra87/ms-farmer:latest
-          platforms: linux/arm64
+          platforms: linux/amd64
