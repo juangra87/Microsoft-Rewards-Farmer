@@ -38,11 +38,11 @@ class Searches:
         num_of_retries = 0
         while True:
             try:
-                self.webdriver.get("https://bing.com")
-                self.browser.utils.wait_until_clickable(By.ID, "sb_form_q")
-                searchbar = self.webdriver.find_element(By.ID, "sb_form_q")
-                searchbar.send_keys(word)
-                searchbar.submit()
+                self.webdriver.get("https://www.bing.com/search?q="+word+"&form=ASDSBP")
+                # self.browser.utils.wait_until_clickable(By.ID, "sb_form_q")
+                # searchbar = self.webdriver.find_element(By.ID, "sb_form_q")
+                # searchbar.send_keys(word)
+                # searchbar.submit()
                 time.sleep(random.randint(self.browser.sleep - 10, self.browser.sleep + 10))
                 return self.browser.utils.get_bing_account_points()
             except TimeoutException:
