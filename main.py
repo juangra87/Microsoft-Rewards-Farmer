@@ -31,8 +31,8 @@ def main():
                     execute_bot_if_proceeds(account, accounts_done, args, i, loaded_accounts, notifier)
                 except Exception as e:
                     logging.exception(f"{e.__class__.__name__}: {e}")
-
-        bot_pause()
+                    bot_pause(pause_time=10, unit="minutes")  
+        bot_pause(pause_time=3, unit="hours")  
         restart_account_counters(loaded_accounts)
 
 
@@ -52,11 +52,16 @@ def log_account_status(loaded_accounts, accounts_done):
         else:
             logging.info(f'[BOT STATUS] 🟥 - {current_account.get("username", "")}')
 
-def bot_pause():
-    tomorrow_date = datetime.now() + timedelta(hours=3)
-    logging.warning(f'[BOT STATUS] ////////////////////  Pause until {tomorrow_date}  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n\n')
-    pause.until(tomorrow_date)
-
+def bot_pause(pause_time: float, unit: str = "hours"):
+    if unit not in ["hours", "minutes"]:
+        raise ValueError("Invalid unit. Use 'hours' or 'minutes'.") 
+    if unit == "hours":
+        pause_duration = timedelta(hours=pause_time)
+    else:
+        pause_duration = timedelta(minutes=pause_time)
+    resume_time = datetime.now() + pause_duration
+    logging.warning(f'[BOT STATUS] ////////////////////  Pause until {resume_time}  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n\n')
+    pause.until(resume_time)
 
 def restart_account_counters(loaded_accounts):
     return [False] * len(loaded_accounts)
