@@ -38,8 +38,10 @@ class Login:
 
     def execute_login(self):
         logging.info(logger_prefix + "Entering email...")
-        self.utils.wait_until_clickable(By.ID, "i0116", 10)
-        email_field = self.webdriver.find_element(By.ID, "i0116")
+        try:
+            email_field = self.webdriver.find_element(By.ID, "i0116")
+        except Exception:
+            email_field = self.webdriver.find_element(By.ID, "usernameEntry")
 
         while True:
             email_field.send_keys(self.browser.username)
