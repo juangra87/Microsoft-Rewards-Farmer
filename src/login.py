@@ -38,42 +38,52 @@ class Login:
 
     def execute_login(self):
         logging.info(logger_prefix + "Entering email...")
-        try:
-            email_field = self.webdriver.find_element(By.ID, "i0116")
-        except Exception:
-            email_field = self.webdriver.find_element(By.ID, "usernameEntry")
+        email_field = self.getEmailField()
 
         while True:
             email_field.send_keys(self.browser.username)
             time.sleep(3)
             if email_field.get_attribute("value") == self.browser.username:
-                self.webdriver.find_element(By.ID, "idSIButton9").click()
+                self.submitForm()
                 break
 
             email_field.clear()
             time.sleep(3)
-        try:
-            self.enter_password(self.browser.password)
-        except Exception:  # pylint: disable=broad-except
-            logging.error(logger_prefix + "2FA required !")
+        self.enter_password(self.browser.password)
+        """ try:
+            
+        except Exception:
+           logging.error(logger_prefix + "2FA required !")
             with contextlib.suppress(Exception):
                 code = self.webdriver.find_element(
                     By.ID, "idRemoteNGC_DisplaySign"
                 ).get_attribute("innerHTML")
                 logging.error(logger_prefix + f"2FA code: {code}")
-            logging.info("[LOGIN] Press enter when confirmed...")
+            logging.info("[LOGIN] Press enter when confirmed...") """
 
         self.utils.try_dismiss_all_messages()
         time.sleep(1)
 
+    def getEmailField(self):
+        try:
+            email_field = self.webdriver.find_element(By.ID, "i0116")
+        except Exception:
+            email_field = self.webdriver.find_element(By.ID, "usernameEntry")
+        return email_field
+
+    def submitForm(self):
+        try:
+            self.webdriver.find_element(By.ID, "idSIButton9").click()
+        except Exception:
+            self.webdriver.find_element(By.CLASS_NAME, "ffp7eso").click()
+
     def enter_password(self, password):
         self.utils.wait_until_clickable(By.NAME, "passwd", 10)
-        self.utils.wait_until_clickable(By.ID, "idSIButton9", 10)
         password = password.replace("\\", "\\\\").replace('"', '\\"')
         self.webdriver.find_element(By.NAME, "passwd").send_keys(password)
         logging.info("[LOGIN] " + "Writing password...")
         time.sleep(3)
-        self.webdriver.find_element(By.ID, "idSIButton9").click()
+        self.submitForm()
 
     def check_bing_login(self):
         self.webdriver.get(
