@@ -31,7 +31,7 @@ def main():
                     execute_bot_if_proceeds(account, accounts_done, args, i, loaded_accounts, notifier)
                 except Exception as e:
                     logging.exception(f"{e.__class__.__name__}: {e}")
-                    bot_pause(pause_time=10, unit="minutes")  
+                    bot_pause(pause_time=1, unit="minutes")  
         bot_pause(pause_time=3, unit="hours")  
         restart_account_counters(loaded_accounts)
 
