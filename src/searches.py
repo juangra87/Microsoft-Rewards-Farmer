@@ -29,6 +29,8 @@ class Searches:
             search_term = self.get_new_search_term()
             logging.info(f"[BING] [{i}/{number_of_searches}] \t '{search_term}'")
             points_counter = self.bing_search(search_term)
+
+            """ TODO capture value on any of this class: points-container balance-animation """
         logging.info(
             f"[BING] Finished {self.browser.browser_type.capitalize()} Edge Bing searches !"
         )
@@ -38,7 +40,7 @@ class Searches:
         num_of_retries = 0
         while True:
             try:
-                self.webdriver.get("https://www.bing.com/search?q="+word+"&form=ASDSBP")
+                self.webdriver.get("https://www.bing.com/search?q="+word+"&form=TSASDS")
                 # self.browser.utils.wait_until_clickable(By.ID, "sb_form_q")
                 # searchbar = self.webdriver.find_element(By.ID, "sb_form_q")
                 # searchbar.send_keys(word)
