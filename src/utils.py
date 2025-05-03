@@ -60,6 +60,20 @@ class Utils:
                 else:
                     return False
 
+    def read_warnings(self):
+        try:
+            self.go_home()
+            userWarningContainer = self.webdriver.find_element(By.ID, "user-warning-container")
+            if userWarningContainer.is_displayed():
+                warnings = userWarningContainer.find_elements(By.TAG_NAME, "span")
+                for warning in warnings:
+                    if warning.is_displayed():
+                        logging.warning(f"{warning.text}")
+            time.sleep(2)
+        except Exception:
+            self.go_home
+
+
     def wait_until_question_refresh(self):
         return self.wait_for_ms_reward_element(By.CLASS_NAME, "rqECredits")
 
@@ -161,7 +175,9 @@ class Utils:
             (By.ID, "iNext"),
             (By.ID, "iLooksGood"),
             (By.ID, "idSIButton9"),
+            (By.ID, "reward-pivot-earn"),
             (By.CSS_SELECTOR, ".ms-Button.ms-Button--primary"),
+            (By.CSS_SELECTOR, ".ext-secondary"),
         ]
         result = False
         for button in buttons:
@@ -172,16 +188,27 @@ class Utils:
                 continue
         return result
 
+    def try_dismiss_recovery_email_check(self):
+        time.sleep(2)
+        try:
+            self.webdriver.find_elements(By.CSS_SELECTOR, ".fui-Link")[1].click()
+        except Exception:
+            try:
+                self.webdriver.find_element(By.ID, "idA_PWD_SwitchToPassword").click()
+            except Exception:
+                time.sleep(1)
+
     def try_dismiss_cookie_banner(self):
         with contextlib.suppress(Exception):
-            self.webdriver.find_element(By.ID, "cookie-banner").find_element(
-                By.TAG_NAME, "button"
-            ).click()
+            time.sleep(1)
+            self.webdriver.find_element(By.ID, "wcpConsentBannerCtrl").find_elements(
+                By.TAG_NAME, "button")[1].click()
             time.sleep(2)
 
     def try_dismiss_bing_cookie_banner(self):
         with contextlib.suppress(Exception):
-            self.webdriver.find_element(By.ID, "bnp_btn_accept").click()
+            time.sleep(1)
+            self.webdriver.find_element(By.ID, "bnp_btn_reject").click()
             time.sleep(2)
 
     def switch_to_new_tab(self, time_to_wait: int = 0):

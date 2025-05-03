@@ -8,12 +8,13 @@ from typing import Any
 import ipapi
 import seleniumwire.undetected_chromedriver as webdriver
 from selenium.webdriver.chrome.webdriver import WebDriver
+from datetime import datetime
 
 from src.userAgentGenerator import GenerateUserAgent
 from src.utils import Utils
 
 
-DEFAULT_SLEEP = 160
+DEFAULT_SLEEP = 300
 class Browser:
     """WebDriver wrapper class."""
 
@@ -177,7 +178,7 @@ class Browser:
         sessions_dir = parent / "sessions"
 
         session_uuid = uuid.uuid5(uuid.NAMESPACE_DNS, self.username)
-        sessions_dir = sessions_dir / str(session_uuid) / self.browser_type
+        sessions_dir = sessions_dir / str(session_uuid) / self.browser_type / datetime.now().strftime("%Y_%m_%d_-_%H_%M")
         sessions_dir.mkdir(parents=True, exist_ok=True)
         return sessions_dir
 

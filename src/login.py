@@ -24,6 +24,7 @@ class Login:
         if not already_logged_in:
             self.execute_login()
         self.utils.try_dismiss_cookie_banner()
+        self.utils.read_warnings()
 
         logging.info(logger_prefix + "Logged-in !")
 
@@ -45,22 +46,13 @@ class Login:
             time.sleep(3)
             if email_field.get_attribute("value") == self.browser.username:
                 self.submitForm()
+                self.utils.try_dismiss_all_messages
                 break
 
             email_field.clear()
             time.sleep(3)
         self.enter_password(self.browser.password)
-        """ try:
-            
-        except Exception:
-           logging.error(logger_prefix + "2FA required !")
-            with contextlib.suppress(Exception):
-                code = self.webdriver.find_element(
-                    By.ID, "idRemoteNGC_DisplaySign"
-                ).get_attribute("innerHTML")
-                logging.error(logger_prefix + f"2FA code: {code}")
-            logging.info("[LOGIN] Press enter when confirmed...") """
-
+        time.sleep(1)
         self.utils.try_dismiss_all_messages()
         time.sleep(1)
 
@@ -78,6 +70,7 @@ class Login:
             self.webdriver.find_element(By.CLASS_NAME, "ffp7eso").click()
 
     def enter_password(self, password):
+        self.utils.try_dismiss_recovery_email_check()
         self.utils.wait_until_clickable(By.NAME, "passwd", 10)
         password = password.replace("\\", "\\\\").replace('"', '\\"')
         self.webdriver.find_element(By.NAME, "passwd").send_keys(password)
