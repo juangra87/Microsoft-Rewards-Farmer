@@ -35,8 +35,8 @@ class Searches:
                 break
             else:
                 previous_points = points_counter
-                
-            logging.info(f"[BING] [{i}/{number_of_searches}] - {points_counter} points. \t '{search_term}' - Next search in {self.browser.sleep} seconds...")
+                logging.info(f"[BING] [{i}/{number_of_searches}] - {points_counter} points. \t '{search_term}' - Next search in {self.browser.sleep} seconds...")
+                time.sleep(self.browser.sleep - 10)
         logging.info(
             f"[BING] Finished {self.browser.browser_type.capitalize()} Edge Bing searches !"
         )
@@ -50,9 +50,8 @@ class Searches:
                 self.browser.utils.wait_until_clickable(By.ID, "sb_form_q")
                 searchbar = self.webdriver.find_element(By.ID, "sb_form_q")
                 searchbar.send_keys(word)
-                searchbar.submit()
                 self.browser.utils.try_dismiss_bing_cookie_banner()
-                time.sleep(random.randint(self.browser.sleep - 10, self.browser.sleep + 10))
+                time.sleep(10)
                 return self.browser.utils.get_bing_account_points()
             except TimeoutException:
                 if num_of_retries == MAX_RETRIES:
@@ -62,3 +61,4 @@ class Searches:
                     logging.error(f"[BING] Timeout {num_of_retries}/{MAX_RETRIES}, retrying in 5 seconds...")
                     time.sleep(5)
                     continue
+
