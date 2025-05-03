@@ -70,7 +70,10 @@ class Login:
             self.webdriver.find_element(By.CLASS_NAME, "ffp7eso").click()
 
     def enter_password(self, password):
-        self.utils.try_dismiss_recovery_email_check()
+        try:
+            self.utils.wait_until_clickable(By.NAME, "passwd", 10)
+        except Exception:
+            self.utils.try_dismiss_recovery_email_check()
         self.utils.wait_until_clickable(By.NAME, "passwd", 10)
         password = password.replace("\\", "\\\\").replace('"', '\\"')
         self.webdriver.find_element(By.NAME, "passwd").send_keys(password)
