@@ -33,6 +33,9 @@ class Searches:
                 logging.warning(
                     f"[BING] No points earned for the latest search. \nMicrosoft cooldown might be blocking this account. \n Try again later! \nExiting ... \n")
                 break
+            else:
+                previous_points = points_counter
+                
             logging.info(f"[BING] [{i}/{number_of_searches}] - {points_counter} points. \t '{search_term}' - Next search in {self.browser.sleep} seconds...")
         logging.info(
             f"[BING] Finished {self.browser.browser_type.capitalize()} Edge Bing searches !"
