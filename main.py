@@ -186,9 +186,6 @@ def execute_bot(current_account, notifier: Notifier, args: argparse.Namespace):
                 account_points_counter = Searches(mobileBrowser).bing_searches(
                     remaining_searches_m
                 )
-                DailySet(mobileBrowser).complete_daily_set()
-                PunchCards(mobileBrowser).complete_punch_cards()
-                MorePromotions(mobileBrowser).complete_more_promotions()
         points_earned = desktopBrowser.utils.format_number(account_points_counter - starting_points)
         logging.info(
             f"[POINTS] You have earned {points_earned} points today !"

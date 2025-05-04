@@ -30,6 +30,9 @@ class Searches:
             search_term = self.get_new_search_term()
             points_counter = self.bing_search(search_term)
             if previous_points == points_counter:
+                points_counter = self.bing_search_method_2(search_term)
+            
+            if previous_points == points_counter:
                 logging.warning(
                     f"[BING] No points earned for the latest search. \nMicrosoft cooldown might be blocking this account. \n Try again later! \nExiting ... \n")
                 break
@@ -50,6 +53,7 @@ class Searches:
                 self.browser.utils.wait_until_clickable(By.ID, "sb_form_q")
                 searchbar = self.webdriver.find_element(By.ID, "sb_form_q")
                 searchbar.send_keys(word)
+                searchbar.submit()
                 self.browser.utils.try_dismiss_bing_cookie_banner()
                 time.sleep(30)
                 return self.browser.utils.get_bing_account_points()
@@ -62,3 +66,19 @@ class Searches:
                     time.sleep(5)
                     continue
 
+    def bing_search_method_2(self, word: str):
+        num_of_retries = 0
+        while True:
+            try:
+                self.webdriver.get("https://www.bing.com/search?q=" + word + "&form=TSASDS")
+                self.browser.utils.try_dismiss_bing_cookie_banner()
+                time.sleep(30)
+                return self.browser.utils.get_bing_account_points()
+            except TimeoutException:
+                if num_of_retries == MAX_RETRIES:
+                    break
+                else:
+                    num_of_retries += 1
+                    logging.error(f"[BING] Timeout {num_of_retries}/{MAX_RETRIES}, retrying in 5 seconds...")
+                    time.sleep(5)
+                    continue
