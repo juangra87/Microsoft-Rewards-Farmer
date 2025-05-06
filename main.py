@@ -32,7 +32,7 @@ def main():
                 except Exception as e:
                     logging.exception(f"{e.__class__.__name__}: {e}")
                     bot_pause(pause_time=1, unit="minutes")  
-        bot_pause(pause_time=3, unit="hours")  
+        bot_pause(pause_time=30, unit="minutes")  
         restart_account_counters(loaded_accounts)
 
 
