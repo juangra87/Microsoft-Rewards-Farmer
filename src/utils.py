@@ -179,7 +179,7 @@ class Utils:
             (By.ID, "reward-pivot-earn"),
             (By.CSS_SELECTOR, ".ms-Button.ms-Button--primary"),
             (By.CSS_SELECTOR, ".ext-secondary"),
-            (By.CSS_SELECTOR, ".r1alrhcs ___1me6uh6"),
+            (By.CSS_SELECTOR, ".___1me6uh6"),
         ]
         result = False
         for button in buttons:
