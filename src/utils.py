@@ -1,18 +1,18 @@
 import contextlib
 import json
 import locale as pylocale
+import logging
 import time
 import urllib.parse
 from pathlib import Path
-import logging
 
 import requests
+from requests import Session
 from requests.adapters import HTTPAdapter
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
-from requests import Session
 from urllib3 import Retry
 
 from .constants import BASE_URL
@@ -63,7 +63,9 @@ class Utils:
     def read_warnings(self):
         try:
             self.go_home()
-            userWarningContainer = self.webdriver.find_element(By.ID, "user-warning-container")
+            userWarningContainer = self.webdriver.find_element(
+                By.ID, "user-warning-container"
+            )
             if userWarningContainer.is_displayed():
                 warnings = userWarningContainer.find_elements(By.TAG_NAME, "span")
                 for warning in warnings:
@@ -72,7 +74,6 @@ class Utils:
             time.sleep(2)
         except Exception:
             self.go_home
-
 
     def wait_until_question_refresh(self):
         return self.wait_for_ms_reward_element(By.CLASS_NAME, "rqECredits")
@@ -178,6 +179,7 @@ class Utils:
             (By.ID, "reward-pivot-earn"),
             (By.CSS_SELECTOR, ".ms-Button.ms-Button--primary"),
             (By.CSS_SELECTOR, ".ext-secondary"),
+            (By.CSS_SELECTOR, ".r1alrhcs ___1me6uh6"),
         ]
         result = False
         for button in buttons:
@@ -202,7 +204,8 @@ class Utils:
         with contextlib.suppress(Exception):
             time.sleep(1)
             self.webdriver.find_element(By.ID, "wcpConsentBannerCtrl").find_elements(
-                By.TAG_NAME, "button")[1].click()
+                By.TAG_NAME, "button"
+            )[1].click()
             time.sleep(2)
 
     def try_dismiss_bing_cookie_banner(self):
@@ -239,7 +242,9 @@ class Utils:
         for counter in counters["pcSearch"]:
             progress_desktop += counter["pointProgress"]
             target_desktop += counter["pointProgressMax"]
-        logging.info(f"[REMAINING POINTS FROM SEARCHES]: {target_desktop - progress_desktop}")
+        logging.info(
+            f"[REMAINING POINTS FROM SEARCHES]: {target_desktop - progress_desktop}"
+        )
 
         if target_desktop in [30, 102, 90]:
             # Level 1 or 2 EU
