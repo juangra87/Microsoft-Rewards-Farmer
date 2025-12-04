@@ -31,7 +31,8 @@ def main():
                     execute_bot_if_proceeds(account, accounts_done, args, i, loaded_accounts, notifier)
                 except Exception as e:
                     logging.exception(f"{e.__class__.__name__}: {e}")
-                    bot_pause(pause_time=1, unit="minutes")  
+                    bot_pause(pause_time=1, unit="minutes")
+                    accounts_done[i] = True
         bot_pause(pause_time=30, unit="minutes")  
         restart_account_counters(loaded_accounts)
 
@@ -171,6 +172,7 @@ def execute_bot(current_account, notifier: Notifier, args: argparse.Namespace):
             remaining_searches,
             remaining_searches_m,
         ) = desktopBrowser.utils.get_remaining_searches()
+        ReadToEarn(desktopBrowser).complete_read_to_earn()
         if remaining_searches != 0:
             account_points_counter = Searches(desktopBrowser).bing_searches(
                 remaining_searches
@@ -182,7 +184,6 @@ def execute_bot(current_account, notifier: Notifier, args: argparse.Namespace):
                 mobile=True, account=current_account, args=args
             ) as mobileBrowser:
                 Login(mobileBrowser).login()
-                ReadToEarn(mobileBrowser).complete_read_to_earn()
                 account_points_counter = Searches(mobileBrowser).bing_searches(
                     remaining_searches_m
                 )
