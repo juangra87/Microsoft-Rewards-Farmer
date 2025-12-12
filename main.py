@@ -77,6 +77,13 @@ def log_account_status(loaded_accounts, accounts_stats):
 
         logging.info(f"{status_icon} {username}{points_earned_str}{total_points_str}")
 
+    total_points_earned = sum(locale.atof(account.get("points_earned", "0")) for account in accounts_stats)
+    total_points_all_accounts = sum(locale.atof(account.get("total_points", "0")) for account in accounts_stats)
+    
+    total_points_earned_str = str(int(total_points_earned)) if total_points_earned == int(total_points_earned) else f"{total_points_earned:.0f}"
+    total_points_all_accounts_str = str(int(total_points_all_accounts)) if total_points_all_accounts == int(total_points_all_accounts) else f"{total_points_all_accounts:.0f}"
+
+    logging.info(f"[SUMMARY] Total earned: {total_points_earned_str} points | Grand total: {total_points_all_accounts_str} points")
     logging.info("")
 
 
