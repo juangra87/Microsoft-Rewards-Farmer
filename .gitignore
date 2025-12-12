@@ -183,3 +183,4 @@ sessions
 logs
 .idea
 /version.txt
+.DS_Store
