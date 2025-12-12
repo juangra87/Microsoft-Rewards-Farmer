@@ -4,8 +4,12 @@ import locale
 import logging
 import logging.handlers as handlers
 import math
+import shutil
 import sys
+from datetime import datetime, timedelta
 from pathlib import Path
+
+import pause
 
 from src import (
     Browser,
@@ -13,15 +17,11 @@ from src import (
     Login,
     MorePromotions,
     PunchCards,
-    Searches,
     ReadToEarn,
+    Searches,
 )
 from src.loggingColoredFormatter import ColoredFormatter
 from src.notifier import Notifier
-import shutil
-
-import pause
-from datetime import datetime, timedelta
 
 
 def main():
@@ -62,7 +62,7 @@ def execute_bot_if_proceeds(
 def log_account_status(loaded_accounts, accounts_stats):
     for i, current_account in enumerate(loaded_accounts):
         account_str = f"{current_account.get("username", "")}"
-        points_earned_str = f"{" - " + accounts_stats[i]["points_earned"] + " points" if accounts_stats[i]["points_earned"] != "0" else ""}"
+        points_earned_str = f"{" - " + accounts_stats[i]["points_earned"] + " points" if "points_earned" in accounts_stats[i] and accounts_stats[i]["points_earned"] and accounts_stats[i]["points_earned"] != "0" else ""}"
         if accounts_stats[i]["done"]:
             logging.info(f"{"[BOT STATUS] ✅ " + account_str + points_earned_str}")
         else:
