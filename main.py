@@ -42,7 +42,7 @@ def main():
                 except Exception as e:
                     logging.exception(f"{e.__class__.__name__}: {e}")
                     bot_pause(pause_time=1, unit="minutes")
-                    accounts_stats[i] = True
+                    accounts_stats[i]["done"] = True
         bot_pause(pause_time=30, unit="minutes")
         restart_account_counters(loaded_accounts)
 
@@ -52,21 +52,32 @@ def execute_bot_if_proceeds(
 ):
     if not accounts_stats[i]["done"]:
         log_start_account(account, i, loaded_accounts)
-        points_earned = execute_bot(account, notifier, args)
-        if math.isclose(locale.atof(points_earned), 0.0, rel_tol=0.1, abs_tol=0.1):
+        bot_results = execute_bot(account, notifier, args)
+        if math.isclose(locale.atof(bot_results["points_earned"]), 0.0, rel_tol=0.1, abs_tol=0.1):
             accounts_stats[i]["done"] = True
-        accounts_stats[i]["points_earned"] = points_earned
+
+        current_points = locale.atof(accounts_stats[i]["points_earned"])
+        new_points = locale.atof(bot_results["points_earned"])
+        accumulated_points = current_points + new_points
+        accounts_stats[i]["points_earned"] = str(int(accumulated_points)) if accumulated_points == int(accumulated_points) else f"{accumulated_points:.0f}"
+        accounts_stats[i]["total_points"] = bot_results["total_points"]
         log_account_status(loaded_accounts, accounts_stats)
 
 
 def log_account_status(loaded_accounts, accounts_stats):
+    logging.info("")
     for i, current_account in enumerate(loaded_accounts):
-        account_str = f"{current_account.get("username", "")}"
-        points_earned_str = f"{" - " + accounts_stats[i]["points_earned"] + " points" if "points_earned" in accounts_stats[i] and accounts_stats[i]["points_earned"] and accounts_stats[i]["points_earned"] != "0" else ""}"
-        if accounts_stats[i]["done"]:
-            logging.info(f"{"[BOT STATUS] ✅ " + account_str + points_earned_str}")
-        else:
-            logging.info(f"{"[BOT STATUS] 🟥 " + account_str + points_earned_str}")
+        username = current_account.get("username", "")
+        points_earned = accounts_stats[i].get("points_earned", "0")
+        total_points = accounts_stats[i].get("total_points", "0")
+
+        points_earned_str = f" - {points_earned} points earned" if points_earned and points_earned != "0" else ""
+        total_points_str = f" - Total: {total_points} points" if total_points else ""
+        status_icon = "✅" if accounts_stats[i]["done"] else "🟥"
+
+        logging.info(f"{status_icon} {username}{points_earned_str}{total_points_str}")
+
+    logging.info("")
 
 
 def bot_pause(pause_time: float, unit: str = "hours"):
@@ -84,7 +95,7 @@ def bot_pause(pause_time: float, unit: str = "hours"):
 
 
 def restart_account_counters(loaded_accounts):
-    return [{"done": False, "points_earned": "0"} for _ in range(len(loaded_accounts))]
+    return [{"done": False, "points_earned": "0", "total_points": "0"} for _ in range(len(loaded_accounts))]
 
 
 def log_start_account(current_account, i, loaded_accounts):
@@ -215,9 +226,10 @@ def execute_bot(current_account, notifier: Notifier, args: argparse.Namespace):
         points_earned = desktopBrowser.utils.format_number(
             account_points_counter - starting_points
         )
+        total_points = desktopBrowser.utils.format_number(account_points_counter)
         logging.info(f"[POINTS] You have earned {points_earned} points today !")
         logging.info(
-            f"[POINTS] You are now at {desktopBrowser.utils.format_number(account_points_counter)} points !\n"
+            f"[POINTS] You are now at {total_points} points !\n"
         )
 
         notifier.send(
@@ -225,12 +237,15 @@ def execute_bot(current_account, notifier: Notifier, args: argparse.Namespace):
                 [
                     "Microsoft Rewards Farmer",
                     f"Account: {current_account.get('username', '')}",
-                    f"Points earned today: {desktopBrowser.utils.format_number(account_points_counter - starting_points)}",
-                    f"Total points: {desktopBrowser.utils.format_number(account_points_counter)}",
+                    f"Points earned today: {points_earned}",
+                    f"Total points: {total_points}",
                 ]
             )
         )
-        return f"{desktopBrowser.utils.format_number(account_points_counter)}"
+        return {
+            "points_earned": points_earned,
+            "total_points": total_points
+        }
 
 
 if __name__ == "__main__":
