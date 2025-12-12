@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 
 from src.browser import Browser
 
-logger_prefix = '[LOGIN] '
+logger_prefix = "[LOGIN] "
 
 
 class Login:
@@ -18,7 +18,7 @@ class Login:
 
     def login(self):
         logging.info(logger_prefix + "Logging-in...")
-        self.webdriver.get( "https://rewards.bing.com/Signin/")
+        self.webdriver.get("https://rewards.bing.com/Signin/")
         already_logged_in = False
 
         if not already_logged_in:
@@ -31,8 +31,8 @@ class Login:
         self.utils.go_home()
         points = self.utils.get_account_points()
 
-        logging.info(logger_prefix + "Ensuring login on Bing...")
-        self.check_bing_login()
+        #        logging.info(logger_prefix + "Ensuring login on Bing...")
+        #        self.check_bing_login()
 
         logging.info("[LOGIN] Logged-in successfully !")
         return points
@@ -82,15 +82,26 @@ class Login:
         self.submitForm()
 
     def check_bing_login(self):
+        logging.info(logger_prefix + "check_bing_login START")
         self.webdriver.get(
             "https://www.bing.com/fd/auth/signin?action=interactive&provider=windows_live_id&return_url=https%3A%2F%2Fwww.bing.com%2F"
         )
+        logging.info(logger_prefix + "check_bing_login")
         for _ in range(5):
+            logging.info(logger_prefix + "check_bing_login FOR")
             current_url = urllib.parse.urlparse(self.webdriver.current_url)
             if current_url.hostname == "www.bing.com" and current_url.path == "/":
+                logging.info(logger_prefix + "check_bing_login IF")
                 time.sleep(3)
                 self.utils.try_dismiss_bing_cookie_banner()
                 with contextlib.suppress(Exception):
+                    logging.info(
+                        logger_prefix
+                        + "check_bing_login contextlib.suppress(Exception) "
+                        + self.utils.check_bing_login()
+                    )
                     if self.utils.check_bing_login():
+                        logging.info(logger_prefix + "check_bing_login IF IF")
                         return
             time.sleep(1)
+        logging.info(logger_prefix + "check_bing_login END")

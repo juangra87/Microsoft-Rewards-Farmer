@@ -7,7 +7,15 @@ import math
 import sys
 from pathlib import Path
 
-from src import Browser, DailySet, Login, MorePromotions, PunchCards, Searches, ReadToEarn
+from src import (
+    Browser,
+    DailySet,
+    Login,
+    MorePromotions,
+    PunchCards,
+    Searches,
+    ReadToEarn,
+)
 from src.loggingColoredFormatter import ColoredFormatter
 from src.notifier import Notifier
 import shutil
@@ -22,61 +30,78 @@ def main():
         args = argument_parser()
         notifier = Notifier(args)
         loaded_accounts = setup_accounts()
-        accounts_done = restart_account_counters(loaded_accounts)
+        accounts_stats = restart_account_counters(loaded_accounts)
         remove_sessions_folder()
-
-        while not all(accounts_done):
+        log_account_status(loaded_accounts, accounts_stats)
+        while not all(account["done"] for account in accounts_stats):
             for i, account in enumerate(loaded_accounts):
                 try:
-                    execute_bot_if_proceeds(account, accounts_done, args, i, loaded_accounts, notifier)
+                    execute_bot_if_proceeds(
+                        account, accounts_stats, args, i, loaded_accounts, notifier
+                    )
                 except Exception as e:
                     logging.exception(f"{e.__class__.__name__}: {e}")
                     bot_pause(pause_time=1, unit="minutes")
-                    accounts_done[i] = True
-        bot_pause(pause_time=30, unit="minutes")  
+                    accounts_stats[i] = True
+        bot_pause(pause_time=30, unit="minutes")
         restart_account_counters(loaded_accounts)
 
 
-def execute_bot_if_proceeds(account, accounts_done, args, i, loaded_accounts, notifier):
-    if not accounts_done[i]:
+def execute_bot_if_proceeds(
+    account, accounts_stats, args, i, loaded_accounts, notifier
+):
+    if not accounts_stats[i]["done"]:
         log_start_account(account, i, loaded_accounts)
         points_earned = execute_bot(account, notifier, args)
-        if math.isclose(locale.atof(points_earned) , 0.0,rel_tol=0.1, abs_tol=0.1):
-            accounts_done[i] = True
-        log_account_status(loaded_accounts, accounts_done)
+        if math.isclose(locale.atof(points_earned), 0.0, rel_tol=0.1, abs_tol=0.1):
+            accounts_stats[i]["done"] = True
+        accounts_stats[i]["points_earned"] = points_earned
+        log_account_status(loaded_accounts, accounts_stats)
 
 
-def log_account_status(loaded_accounts, accounts_done):
+def log_account_status(loaded_accounts, accounts_stats):
     for i, current_account in enumerate(loaded_accounts):
-        if accounts_done[i]:
-            logging.info(f'[BOT STATUS] ✅ - {current_account.get("username", "")}')
+        account_str = f"{current_account.get("username", "")}"
+        points_earned_str = f"{" - " + accounts_stats[i]["points_earned"] + " points" if accounts_stats[i]["points_earned"] != "0" else ""}"
+        if accounts_stats[i]["done"]:
+            logging.info(f"{"[BOT STATUS] ✅ " + account_str + points_earned_str}")
         else:
-            logging.info(f'[BOT STATUS] 🟥 - {current_account.get("username", "")}')
+            logging.info(f"{"[BOT STATUS] 🟥 " + account_str + points_earned_str}")
+
 
 def bot_pause(pause_time: float, unit: str = "hours"):
     if unit not in ["hours", "minutes"]:
-        raise ValueError("Invalid unit. Use 'hours' or 'minutes'.") 
+        raise ValueError("Invalid unit. Use 'hours' or 'minutes'.")
     if unit == "hours":
         pause_duration = timedelta(hours=pause_time)
     else:
         pause_duration = timedelta(minutes=pause_time)
     resume_time = datetime.now() + pause_duration
-    logging.warning(f'[BOT STATUS] ////////////////////  Pause until {resume_time}  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n\n')
+    logging.warning(
+        f"[BOT STATUS] ////////////////////  Pause until {resume_time}  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\n\n"
+    )
     pause.until(resume_time)
 
+
 def restart_account_counters(loaded_accounts):
-    return [False] * len(loaded_accounts)
+    return [{"done": False, "points_earned": "0"} for _ in range(len(loaded_accounts))]
 
 
 def log_start_account(current_account, i, loaded_accounts):
-    logging.info('[ACCOUNT]  ************************************************************************************')
-    logging.info(f'[ACCOUNT]  {i + 1}/{len(loaded_accounts)} - {current_account.get("username", "")}')
-    logging.info('[ACCOUNT]  ************************************************************************************')
+    logging.info(
+        "[ACCOUNT]  ************************************************************************************"
+    )
+    logging.info(
+        f'[ACCOUNT]  {i + 1}/{len(loaded_accounts)} - {current_account.get("username", "")}'
+    )
+    logging.info(
+        "[ACCOUNT]  ************************************************************************************"
+    )
 
 
 def remove_sessions_folder():
     logging.info("Remove sessions folder")
-    shutil.rmtree('./sessions', ignore_errors=True)
+    shutil.rmtree("./sessions", ignore_errors=True)
 
 
 def setup_logging():
@@ -187,10 +212,10 @@ def execute_bot(current_account, notifier: Notifier, args: argparse.Namespace):
                 account_points_counter = Searches(mobileBrowser).bing_searches(
                     remaining_searches_m
                 )
-        points_earned = desktopBrowser.utils.format_number(account_points_counter - starting_points)
-        logging.info(
-            f"[POINTS] You have earned {points_earned} points today !"
+        points_earned = desktopBrowser.utils.format_number(
+            account_points_counter - starting_points
         )
+        logging.info(f"[POINTS] You have earned {points_earned} points today !")
         logging.info(
             f"[POINTS] You are now at {desktopBrowser.utils.format_number(account_points_counter)} points !\n"
         )
@@ -205,7 +230,7 @@ def execute_bot(current_account, notifier: Notifier, args: argparse.Namespace):
                 ]
             )
         )
-        return points_earned
+        return f"{desktopBrowser.utils.format_number(account_points_counter)}"
 
 
 if __name__ == "__main__":
