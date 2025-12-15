@@ -4,6 +4,8 @@ import time
 from time import sleep
 
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 from src.browser import Browser
 
@@ -12,6 +14,27 @@ class Activities:
     def __init__(self, browser: Browser):
         self.browser = browser
         self.webdriver = browser.webdriver
+
+    def open_hero_activity(self):
+        self.webdriver.find_element(By.XPATH, "//mee-rewards-promotion").click()
+        time.sleep(3)
+        if self.browser.utils.wait_until_hero_banner_loads():
+            try:
+                wait = WebDriverWait(self.webdriver, 10)
+                element = wait.until(
+                    EC.element_to_be_clickable(
+                        (
+                            By.XPATH,
+                            "/html/body/div[5]/div[2]/div[2]/mee-rewards-legal-text-box/div/div/div/div[3]/a",
+                        )
+                    )
+                )
+                self.webdriver.execute_script("arguments[0].click();", element)
+                time.sleep(3)
+                logging.info("[HERO] Hero promotion banner clicked")
+            except Exception:
+                logging.info("[HERO] Impossible to opt-in promotion")
+        self.browser.utils.go_home()
 
     def open_daily_set_activity(self, card_id: int):
         self.webdriver.find_element(

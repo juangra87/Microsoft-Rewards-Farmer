@@ -81,6 +81,11 @@ class Utils:
     def wait_until_quiz_loads(self):
         return self.wait_for_ms_reward_element(By.XPATH, '//*[@id="rqStartQuiz"]')
 
+    def wait_until_hero_banner_loads(self):
+        return self.wait_for_ms_reward_element(
+            By.XPATH, "//a[@mee-call-to-action='lightweight']"
+        )
+
     def reset_tabs(self):
         try:
             curr = self.webdriver.current_window_handle

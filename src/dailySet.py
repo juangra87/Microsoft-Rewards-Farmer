@@ -17,6 +17,7 @@ class DailySet:
         # Function to complete the Daily Set
         logging.info("[DAILY SET] " + "Trying to complete the Daily Set...")
         self.browser.utils.go_home()
+        self.activities.open_hero_activity()
         data = self.browser.utils.get_dashboard_data()["dailySetPromotions"]
         today_date = datetime.now().strftime("%m/%d/%Y")
         for activity in data.get(today_date, []):
