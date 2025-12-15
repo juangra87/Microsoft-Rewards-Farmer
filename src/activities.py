@@ -16,10 +16,10 @@ class Activities:
         self.webdriver = browser.webdriver
 
     def open_hero_activity(self):
-        self.webdriver.find_element(By.XPATH, "//mee-rewards-promotion").click()
-        time.sleep(3)
-        if self.browser.utils.wait_until_hero_banner_loads():
-            try:
+        try:
+            self.webdriver.find_element(By.XPATH, "//mee-rewards-promotion").click()
+            time.sleep(3)
+            if self.browser.utils.wait_until_hero_banner_loads():
                 wait = WebDriverWait(self.webdriver, 10)
                 element = wait.until(
                     EC.element_to_be_clickable(
@@ -29,11 +29,11 @@ class Activities:
                         )
                     )
                 )
-                self.webdriver.execute_script("arguments[0].click();", element)
-                time.sleep(3)
-                logging.info("[HERO] Hero promotion banner clicked")
-            except Exception:
-                logging.info("[HERO] Impossible to opt-in promotion")
+            self.webdriver.execute_script("arguments[0].click();", element)
+            time.sleep(3)
+            logging.info("[HERO] Hero promotion banner clicked")
+        except Exception:
+            logging.info("[HERO] No promotion to be clicked.")
         self.browser.utils.go_home()
 
     def open_daily_set_activity(self, card_id: int):
@@ -95,10 +95,10 @@ class Activities:
         )
         for i in range(number_of_options):
             if (
-                    self.webdriver.find_element(
-                        By.ID, f"rqAnswerOption{i}"
-                    ).get_attribute("data-option")
-                    == correct_option
+                self.webdriver.find_element(By.ID, f"rqAnswerOption{i}").get_attribute(
+                    "data-option"
+                )
+                == correct_option
             ):
                 self.webdriver.find_element(By.ID, f"rqAnswerOption{i}").click()
                 time.sleep(5)
