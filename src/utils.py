@@ -247,9 +247,6 @@ class Utils:
         for counter in counters["pcSearch"]:
             progress_desktop += counter["pointProgress"]
             target_desktop += counter["pointProgressMax"]
-        logging.info(
-            f"[REMAINING POINTS FROM SEARCHES]: {target_desktop - progress_desktop}"
-        )
 
         if target_desktop in [30, 102, 90]:
             # Level 1 or 2 EU

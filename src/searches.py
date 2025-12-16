@@ -22,23 +22,24 @@ class Searches:
     def bing_searches(self, number_of_searches: int, points_counter: int = 0):
         logging.info(
             "[BING] "
-            + f"Starting {self.browser.browser_type.capitalize()} Edge Bing searches...",
+            + f"Starting {self.browser.browser_type.capitalize()} Edge Bing searches - around {number_of_searches} searches with {self.browser.sleep} secs between searches...",
         )
 
         previous_points = self.browser.utils.get_bing_account_points()
-        for i in range(1, number_of_searches + 1):
+
+        i = 0
+        while True:
+            i += 1
             search_term = self.get_new_search_term()
             points_counter = self.bing_search(search_term)
             if previous_points == points_counter:
                 points_counter = self.bing_search_method_2(search_term)
 
             if previous_points == points_counter and i > 3:
-                logging.warning(
-                    f"[BING] No points earned for the latest search. \nMicrosoft cooldown might be blocking this account. \n Try again later! \nExiting ... \n")
                 break
             else:
                 previous_points = points_counter
-                logging.info(f"[BING] [{i}/{number_of_searches}] - {points_counter} points. \t '{search_term}' - Next search in {self.browser.sleep} seconds...")
+                logging.info(f"[BING] {i} \t| {points_counter} points. \t| '{search_term}'")
                 time.sleep(self.browser.sleep - 30)
         logging.info(
             f"[BING] Finished {self.browser.browser_type.capitalize()} Edge Bing searches !"
