@@ -248,17 +248,16 @@ def execute_bot(current_account, notifier: Notifier, args: argparse.Namespace):
             f"[POINTS] You are now at {total_points} points !\n"
         )
 
-        if points_earned != "0,00" and points_earned != "0.00":
-            notifier.send(
-                "\n".join(
-                    [
-                        f"Microsoft Rewards Farmer - {socket.gethostname()}",
-                        f"Account: {current_account.get('username', '')}",
-                        f"Points earned today: {points_earned}",
-                        f"Total points: {total_points}",
-                    ]
-                )
+        notifier.send(
+            "\n".join(
+                [
+                    f"Microsoft Rewards Farmer - {socket.gethostname()}",
+                    f"Account: {current_account.get('username', '')}",
+                    f"Points earned today: {points_earned}",
+                    f"Total points: {total_points}",
+                ]
             )
+        )
         return {
             "points_earned": points_earned,
             "total_points": total_points
