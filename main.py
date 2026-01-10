@@ -248,7 +248,7 @@ def execute_bot(current_account, notifier: Notifier, args: argparse.Namespace):
             f"[POINTS] You are now at {total_points} points !\n"
         )
 
-        if locale.atof(points_earned) != 0:
+        if points_earned != "0,00" and points_earned != "0.00":
             notifier.send(
                 "\n".join(
                     [
