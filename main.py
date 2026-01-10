@@ -127,7 +127,7 @@ def log_start_account(current_account, i, loaded_accounts):
 
 
 def remove_sessions_folder():
-    logging.info("Remove sessions folder")
+    logging.info(f"{socket.gethostname()} - Remove sessions folder")
     shutil.rmtree("./sessions", ignore_errors=True)
 
 
