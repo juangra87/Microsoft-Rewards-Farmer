@@ -6,6 +6,7 @@ import logging.handlers as handlers
 import math
 import shutil
 import sys
+import socket
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -42,7 +43,16 @@ def main():
                 except Exception as e:
                     logging.exception(f"{e.__class__.__name__}: {e}")
                     bot_pause(pause_time=1, unit="minutes")
-                    accounts_stats[i]["done"] = True
+                    accounts_stats[i]["done"] = False
+                    notifier.send(
+                        "\n".join(
+                            [
+                                f"Microsoft Rewards Farmer - {socket.gethostname()}",
+                                f"Account: {account.get('username', '')}",
+                                f"Exception: {e.__class__.__name__} - {e}",
+                            ]
+                        )
+                    )
         bot_pause(pause_time=30, unit="minutes")
         restart_account_counters(loaded_accounts)
 
@@ -79,7 +89,6 @@ def log_account_status(loaded_accounts, accounts_stats):
 
     total_points_earned = sum(locale.atof(account.get("points_earned", "0")) for account in accounts_stats)
     total_points_all_accounts = sum(locale.atof(account.get("total_points", "0")) for account in accounts_stats)
-    
     total_points_earned_str = str(int(total_points_earned)) if total_points_earned == int(total_points_earned) else f"{total_points_earned:.0f}"
     total_points_all_accounts_str = str(int(total_points_all_accounts)) if total_points_all_accounts == int(total_points_all_accounts) else f"{total_points_all_accounts:.0f}"
 
@@ -239,16 +248,17 @@ def execute_bot(current_account, notifier: Notifier, args: argparse.Namespace):
             f"[POINTS] You are now at {total_points} points !\n"
         )
 
-        notifier.send(
-            "\n".join(
-                [
-                    "Microsoft Rewards Farmer",
-                    f"Account: {current_account.get('username', '')}",
-                    f"Points earned today: {points_earned}",
-                    f"Total points: {total_points}",
-                ]
+        if locale.atof(points_earned) != 0:
+            notifier.send(
+                "\n".join(
+                    [
+                        f"Microsoft Rewards Farmer - {socket.gethostname()}",
+                        f"Account: {current_account.get('username', '')}",
+                        f"Points earned today: {points_earned}",
+                        f"Total points: {total_points}",
+                    ]
+                )
             )
-        )
         return {
             "points_earned": points_earned,
             "total_points": total_points
