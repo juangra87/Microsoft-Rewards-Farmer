@@ -5,22 +5,16 @@ import logging
 import logging.handlers as handlers
 import math
 import shutil
-import sys
 import socket
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
+import ipapi
 import pause
 
-from src import (
-    Browser,
-    DailySet,
-    Login,
-    MorePromotions,
-    PunchCards,
-    ReadToEarn,
-    Searches,
-)
+from src import (Browser, DailySet, Login, MorePromotions, PunchCards,
+                 ReadToEarn, Searches)
 from src.loggingColoredFormatter import ColoredFormatter
 from src.notifier import Notifier
 
@@ -33,7 +27,8 @@ def main():
         loaded_accounts = setup_accounts()
         accounts_stats = restart_account_counters(loaded_accounts)
         remove_sessions_folder()
-        log_account_status(loaded_accounts, accounts_stats)
+        current_ip = get_current_ip()
+        log_account_status(loaded_accounts, accounts_stats, current_ip)
         while not all(account["done"] for account in accounts_stats):
             for i, account in enumerate(loaded_accounts):
                 try:
@@ -71,11 +66,14 @@ def execute_bot_if_proceeds(
         accumulated_points = current_points + new_points
         accounts_stats[i]["points_earned"] = str(int(accumulated_points)) if accumulated_points == int(accumulated_points) else f"{accumulated_points:.0f}"
         accounts_stats[i]["total_points"] = bot_results["total_points"]
-        log_account_status(loaded_accounts, accounts_stats)
+        current_ip = get_current_ip()
+        log_account_status(loaded_accounts, accounts_stats, current_ip)
 
 
-def log_account_status(loaded_accounts, accounts_stats):
+def log_account_status(loaded_accounts, accounts_stats, current_ip=None):
     logging.info("")
+    if current_ip:
+        logging.info(f"[IP] Current IP: {current_ip}")
     for i, current_account in enumerate(loaded_accounts):
         username = current_account.get("username", "")
         points_earned = accounts_stats[i].get("points_earned", "0")
@@ -94,6 +92,15 @@ def log_account_status(loaded_accounts, accounts_stats):
 
     logging.info(f"[SUMMARY] Total earned: {total_points_earned_str} points | Grand total: {total_points_all_accounts_str} points")
     logging.info("")
+
+
+def get_current_ip():
+    try:
+        response = ipapi.location()
+        return response.get("ip", "Unknown")
+    except Exception as e:
+        logging.warning(f"[IP] Could not retrieve IP: {e}")
+        return "Unknown"
 
 
 def bot_pause(pause_time: float, unit: str = "hours"):
