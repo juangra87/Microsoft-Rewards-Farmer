@@ -89,6 +89,7 @@ class Browser:
             options=options,
             seleniumwire_options=selenium_options,
             user_data_dir=self.user_data_dir.as_posix(),
+            version_main=144,
         )
 
         selenium_logger = logging.getLogger("seleniumwire")
