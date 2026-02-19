@@ -2,19 +2,20 @@ import contextlib
 import logging
 import random
 import uuid
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 import ipapi
 import seleniumwire.undetected_chromedriver as webdriver
 from selenium.webdriver.chrome.webdriver import WebDriver
-from datetime import datetime
 
 from src.userAgentGenerator import GenerateUserAgent
 from src.utils import Utils
 
-
 DEFAULT_SLEEP = 300
+
+
 class Browser:
     """WebDriver wrapper class."""
 
@@ -28,9 +29,7 @@ class Browser:
             self.sleep = account["sleep"]
         except Exception:
             self.sleep = DEFAULT_SLEEP
-        logging.info(
-            f'[BROWSER] { self.sleep } seconds between searches '
-        )
+        logging.info(f"[BROWSER] { self.sleep } seconds between searches ")
         self.locale_lang, self.locale_geo = self.get_c_code_lang(args.lang, args.geo)
         self.proxy = None
         if args.proxy:
@@ -75,6 +74,17 @@ class Browser:
         options.add_argument("--ignore-certificate-errors-spki-list")
         options.add_argument("--ignore-ssl-errors")
         options.add_argument("--disable-search-engine-choice-screen")
+
+        # Disable password manager and credential popups
+        options.add_argument("--disable-password-manager-reauthentication")
+        options.add_experimental_option(
+            "prefs",
+            {
+                "profile.password_manager_enabled": False,
+                "credentials_enable_service": False,
+                "profile.autofill_enabled": False,
+            },
+        )
 
         selenium_options: dict[str, Any] = {"verify_ssl": False}
 
@@ -160,9 +170,7 @@ class Browser:
         )
         # Set timeout to something bigger that account sleep
         timeout = self.sleep + 5
-        logging.info(
-            f'[BROWSER] Default timeout:{timeout}'
-        )
+        logging.info(f"[BROWSER] Default timeout:{timeout}")
         driver.set_page_load_timeout(timeout)
         return driver
 
@@ -179,7 +187,12 @@ class Browser:
         sessions_dir = parent / "sessions"
 
         session_uuid = uuid.uuid5(uuid.NAMESPACE_DNS, self.username)
-        sessions_dir = sessions_dir / str(session_uuid) / self.browser_type / datetime.now().strftime("%Y_%m_%d_-_%H_%M")
+        sessions_dir = (
+            sessions_dir
+            / str(session_uuid)
+            / self.browser_type
+            / datetime.now().strftime("%Y_%m_%d_-_%H_%M")
+        )
         sessions_dir.mkdir(parents=True, exist_ok=True)
         return sessions_dir
 
