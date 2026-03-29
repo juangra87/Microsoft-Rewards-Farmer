@@ -137,7 +137,78 @@ class Utils:
         return str(t)
 
     def get_dashboard_data(self) -> dict:
-        return self.webdriver.execute_script("return dashboard")
+        """
+        Get dashboard data from the Bing API.
+        Microsoft changed the dashboard and 'dashboard' JS variable no longer exists.
+        """
+        try:
+            # Try the old method first (in case it comes back)
+            dashboard_data = self.webdriver.execute_script("return dashboard")
+            if dashboard_data:
+                return dashboard_data
+        except Exception:
+            pass
+        
+        # Use the Bing API endpoint instead
+        data = self.get_bing_info()
+        if data:
+            # Convert Bing API format to expected dashboard format
+            user_info = data.get("userInfo", {})
+            user_status = data.get("userStatus", {})
+            
+            dashboard_structure = {
+                "userStatus": {
+                    "availablePoints": user_info.get("balance", 0),
+                    "counters": user_status.get("counters", {}),
+                    "levelInfo": user_status.get("levelInfo", {
+                        "activeLevel": "Level2"
+                    })
+                },
+                "dailySetPromotions": data.get("dailySetPromotions", []),
+                "punchCards": data.get("punchCards", []),
+                "morePromotions": data.get("morePromotions", []),
+                "promotionalItem": data.get("promotionalItem", None)
+            }
+            return dashboard_structure
+        
+        # Fallback: try to scrape from page
+        logging.warning("Could not get dashboard data from API, attempting page scrape")
+        try:
+            # Try to find points on the page
+            points_element = self.webdriver.find_element(By.CSS_SELECTOR, "[class*='points'], [class*='balance']")
+            points_text = points_element.text
+            # Extract number from text
+            import re
+            points_match = re.search(r'[\d.,]+', points_text.replace('.', '').replace(',', ''))
+            if points_match:
+                points = int(points_match.group(0))
+                return {
+                    "userStatus": {
+                        "availablePoints": points,
+                        "counters": {},
+                        "levelInfo": {"activeLevel": "Level2"}
+                    },
+                    "dailySetPromotions": [],
+                    "punchCards": [],
+                    "morePromotions": [],
+                    "promotionalItem": None
+                }
+        except Exception as e:
+            logging.error(f"Failed to scrape dashboard data: {e}")
+        
+        # Last resort: return empty structure
+        logging.error("Could not retrieve dashboard data, returning empty structure")
+        return {
+            "userStatus": {
+                "availablePoints": 0,
+                "counters": {},
+                "levelInfo": {"activeLevel": "Level2"}
+            },
+            "dailySetPromotions": [],
+            "punchCards": [],
+            "morePromotions": [],
+            "promotionalItem": None
+        }
 
     def get_bing_info(self):
         cookie_jar = self.webdriver.get_cookies()
@@ -238,15 +309,21 @@ class Utils:
     def get_remaining_searches(self):
         dashboard = self.get_dashboard_data()
         search_points = 1
-        counters = dashboard["userStatus"]["counters"]
-        if "pcSearch" not in counters:
+        
+        counters = dashboard.get("userStatus", {}).get("counters", {})
+        if not counters or "pcSearch" not in counters:
+            # If counters not available, return default values
+            logging.warning("No search counters available, using defaults")
             return 30, 20
 
         progress_desktop = 0
         target_desktop = 0
-        for counter in counters["pcSearch"]:
-            progress_desktop += counter["pointProgress"]
-            target_desktop += counter["pointProgressMax"]
+        
+        pc_search = counters.get("pcSearch", [])
+        if pc_search:
+            for counter in pc_search:
+                progress_desktop += counter.get("pointProgress", 0)
+                target_desktop += counter.get("pointProgressMax", 0)
 
         if target_desktop in [30, 102, 90]:
             # Level 1 or 2 EU
@@ -254,12 +331,20 @@ class Utils:
         elif target_desktop == 55 or target_desktop >= 170:
             # Level 1 or 2 US
             search_points = 5
-        remaining_desktop = int((target_desktop - progress_desktop) / search_points)
+        
+        remaining_desktop = int((target_desktop - progress_desktop) / search_points) if search_points > 0 else 30
         remaining_mobile = 0
-        if dashboard["userStatus"]["levelInfo"]["activeLevel"] != "Level1":
-            progress_mobile = counters["mobileSearch"][0]["pointProgress"]
-            target_mobile = counters["mobileSearch"][0]["pointProgressMax"]
-            remaining_mobile = int((target_mobile - progress_mobile) / search_points)
+        
+        level_info = dashboard.get("userStatus", {}).get("levelInfo", {})
+        active_level = level_info.get("activeLevel", "Level2")
+        
+        if active_level != "Level1":
+            mobile_search = counters.get("mobileSearch", [])
+            if mobile_search and len(mobile_search) > 0:
+                progress_mobile = mobile_search[0].get("pointProgress", 0)
+                target_mobile = mobile_search[0].get("pointProgressMax", 0)
+                remaining_mobile = int((target_mobile - progress_mobile) / search_points) if search_points > 0 else 20
+        
         return remaining_desktop, remaining_mobile
 
     def format_number(self, number, num_decimals=2):
