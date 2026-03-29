@@ -16,23 +16,30 @@ class MorePromotions:
         # Function to complete More Promotions
         logging.info(f"{MORE_PROMOS_PREFIX}Trying to complete More Promotions...")
         self.browser.utils.go_home()
-        more_promotions = self.browser.utils.get_dashboard_data()["morePromotions"]
+        
+        dashboard_data = self.browser.utils.get_dashboard_data()
+        more_promotions = dashboard_data.get("morePromotions", [])
+        
+        if not more_promotions:
+            logging.info(f"{MORE_PROMOS_PREFIX}No more promotions available")
+            return
+        
         i = 0
         for promotion in more_promotions:
             try:
                 i += 1
                 if (
-                    promotion["complete"] is False
-                    and promotion["pointProgressMax"] != 0
+                    promotion.get("complete", True) is False
+                    and promotion.get("pointProgressMax", 0) != 0
                 ):
                     # Open the activity for the promotion
                     self.activities.open_more_promotions_activity(i)
-                    if promotion["promotionType"] == "urlreward":
+                    if promotion.get("promotionType") == "urlreward":
                         # Complete search for URL reward
                         self.activities.complete_search()
                     elif (
-                        promotion["promotionType"] == "quiz"
-                        and promotion["pointProgress"] == 0
+                        promotion.get("promotionType") == "quiz"
+                        and promotion.get("pointProgress", 0) == 0
                     ):
                         self.complete_point_progress_quizzes(promotion)
                     else:

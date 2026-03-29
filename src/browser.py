@@ -1,10 +1,13 @@
 import contextlib
 import logging
+import os
 import random
+import re
+import subprocess
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import ipapi
 import seleniumwire.undetected_chromedriver as webdriver
@@ -13,9 +16,106 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 from src.userAgentGenerator import GenerateUserAgent
 from src.utils import Utils
 
+<<<<<<< Updated upstream
 DEFAULT_SLEEP = 300
 
 
+=======
+
+DEFAULT_SLEEP = 200
+
+
+def get_chrome_version() -> Optional[int]:
+    """Detect installed Chrome version and return major version number."""
+    try:
+        chrome_paths = [
+            r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+            r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+            Path.home() / "AppData" / "Local" / "Google" / "Chrome" / "Application" / "chrome.exe",
+        ]
+        
+        for path in chrome_paths:
+            path_str = str(path)
+            if os.path.exists(path_str):
+                result = subprocess.run(
+                    [path_str, "--version"],
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                )
+                if result.returncode == 0:
+                    match = re.search(r"(\d+)\.\d+\.\d+\.\d+", result.stdout)
+                    if match:
+                        version = int(match.group(1))
+                        logging.debug(f"Detected Chrome version: {version}")
+                        return version
+    except Exception as e:
+        logging.debug(f"Could not detect Chrome version: {e}")
+    return None
+
+
+def ensure_chromedriver_version() -> None:
+    """Ensure ChromeDriver matches Chrome version."""
+    try:
+        chrome_version = get_chrome_version()
+        if not chrome_version:
+            logging.debug("Could not detect Chrome version, skipping version check")
+            return
+        
+        project_root = Path(__file__).parent.parent
+        local_chromedriver = project_root / "chromedriver.exe"
+        
+        # Check if we need to update ChromeDriver
+        needs_update = False
+        
+        if not local_chromedriver.exists():
+            logging.info(f"ChromeDriver not found, will download version {chrome_version}")
+            needs_update = True
+        else:
+            # Check ChromeDriver version
+            try:
+                result = subprocess.run(
+                    [str(local_chromedriver), "--version"],
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                )
+                if result.returncode == 0:
+                    match = re.search(r"(\d+)\.\d+\.\d+", result.stdout)
+                    if match:
+                        driver_version = int(match.group(1))
+                        if driver_version != chrome_version:
+                            logging.warning(
+                                f"ChromeDriver version mismatch: Driver={driver_version}, Chrome={chrome_version}"
+                            )
+                            needs_update = True
+                        else:
+                            logging.debug(f"ChromeDriver version {driver_version} matches Chrome")
+            except Exception as e:
+                logging.debug(f"Could not check ChromeDriver version: {e}")
+                needs_update = True
+        
+        if needs_update:
+            logging.info(f"Auto-downloading ChromeDriver {chrome_version}...")
+            download_script = project_root / "download_chromedriver.py"
+            if download_script.exists():
+                subprocess.run(
+                    ["python", str(download_script), str(chrome_version)],
+                    cwd=str(project_root),
+                    timeout=120,
+                )
+                # Replace cached version
+                replace_script = project_root / "replace_chromedriver.ps1"
+                if replace_script.exists():
+                    subprocess.run(
+                        ["powershell", "-ExecutionPolicy", "Bypass", "-File", str(replace_script)],
+                        cwd=str(project_root),
+                        timeout=30,
+                    )
+                logging.info("ChromeDriver updated successfully")
+    except Exception as e:
+        logging.warning(f"Could not auto-update ChromeDriver: {e}")
+>>>>>>> Stashed changes
 class Browser:
     """WebDriver wrapper class."""
 
@@ -65,6 +165,9 @@ class Browser:
     def browser_setup(
         self,
     ) -> WebDriver:
+        # Auto-check and update ChromeDriver if needed
+        ensure_chromedriver_version()
+        
         options = webdriver.ChromeOptions()
         options.headless = self.headless
         options.add_argument(f"--lang={self.locale_lang}")
@@ -95,12 +198,30 @@ class Browser:
                 "no_proxy": "localhost,127.0.0.1",
             }
 
+<<<<<<< Updated upstream
         driver = webdriver.Chrome(
             options=options,
             seleniumwire_options=selenium_options,
             user_data_dir=self.user_data_dir.as_posix(),
             version_main=144,
         )
+=======
+        # Check if there's a local chromedriver.exe (manually downloaded)
+        local_chromedriver = Path(__file__).parent.parent / "chromedriver.exe"
+        driver_kwargs = {
+            "options": options,
+            "seleniumwire_options": selenium_options,
+            "user_data_dir": self.user_data_dir.as_posix(),
+        }
+        
+        if local_chromedriver.exists():
+            logging.info(f"Using local ChromeDriver: {local_chromedriver}")
+            driver_kwargs["driver_executable_path"] = str(local_chromedriver)
+        else:
+            logging.debug("No local ChromeDriver found, using auto-download")
+
+        driver = webdriver.Chrome(**driver_kwargs)
+>>>>>>> Stashed changes
 
         selenium_logger = logging.getLogger("seleniumwire")
         selenium_logger.setLevel(logging.ERROR)

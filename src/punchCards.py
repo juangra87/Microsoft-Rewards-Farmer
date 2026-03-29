@@ -19,11 +19,11 @@ class PunchCards:
     def complete_punch_card(self, url: str, child_promotions: dict):
         self.webdriver.get(url)
         for child in child_promotions:
-            if child["complete"] is False:
-                if child["promotionType"] == "urlreward":
+            if child.get("complete", True) is False:
+                if child.get("promotionType") == "urlreward":
                     self.webdriver.find_element(By.CLASS_NAME, "offer-cta").click()
                     self.browser.utils.visit_new_tab(random.randint(13, 17))
-                if child["promotionType"] == "quiz":
+                if child.get("promotionType") == "quiz":
                     self.webdriver.find_element(By.CLASS_NAME, "offer-cta").click()
                     self.browser.utils.switch_to_new_tab(8)
                     counter = str(
@@ -51,18 +51,32 @@ class PunchCards:
     def complete_punch_cards(self):
         logging.info("[PUNCH CARDS] " + "Trying to complete the Punch Cards...")
         self.complete_promotional_items()
-        punch_cards = self.browser.utils.get_dashboard_data()["punchCards"]
+        
+        dashboard_data = self.browser.utils.get_dashboard_data()
+        punch_cards = dashboard_data.get("punchCards", [])
+        
+        if not punch_cards:
+            logging.info("[PUNCH CARDS] No punch cards available")
+            logging.info("[PUNCH CARDS] Completed the Punch Cards successfully !")
+            time.sleep(2)
+            self.webdriver.get(BASE_URL)
+            time.sleep(2)
+            return
+        
         for punch_card in punch_cards:
             try:
+                parent = punch_card.get("parentPromotion")
+                children = punch_card.get("childPromotions")
+                
                 if (
-                    punch_card["parentPromotion"]
-                    and punch_card["childPromotions"]
-                    and not punch_card["parentPromotion"]["complete"]
-                    and punch_card["parentPromotion"]["pointProgressMax"] != 0
+                    parent
+                    and children
+                    and not parent.get("complete", True)
+                    and parent.get("pointProgressMax", 0) != 0
                 ):
                     self.complete_punch_card(
-                        punch_card["parentPromotion"]["attributes"]["destination"],
-                        punch_card["childPromotions"],
+                        parent.get("attributes", {}).get("destination", ""),
+                        children,
                     )
             except Exception:  # pylint: disable=broad-except
                 self.browser.utils.reset_tabs()
@@ -73,12 +87,17 @@ class PunchCards:
 
     def complete_promotional_items(self):
         with contextlib.suppress(Exception):
-            item = self.browser.utils.get_dashboard_data()["promotionalItem"]
-            dest_url = urllib.parse.urlparse(item["destinationUrl"])
+            dashboard_data = self.browser.utils.get_dashboard_data()
+            item = dashboard_data.get("promotionalItem")
+            
+            if not item:
+                return
+            
+            dest_url = urllib.parse.urlparse(item.get("destinationUrl", ""))
             base_url = urllib.parse.urlparse(BASE_URL)
             if (
-                (item["pointProgressMax"] in [100, 200, 500])
-                and not item["complete"]
+                (item.get("pointProgressMax", 0) in [100, 200, 500])
+                and not item.get("complete", True)
                 and (
                     (
                         dest_url.hostname == base_url.hostname

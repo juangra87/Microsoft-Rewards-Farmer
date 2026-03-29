@@ -18,16 +18,29 @@ class DailySet:
         logging.info("[DAILY SET] " + "Trying to complete the Daily Set...")
         self.browser.utils.go_home()
         self.activities.open_hero_activity()
-        data = self.browser.utils.get_dashboard_data()["dailySetPromotions"]
+        
+        dashboard_data = self.browser.utils.get_dashboard_data()
+        daily_set_data = dashboard_data.get("dailySetPromotions", {})
+        
+        if not daily_set_data:
+            logging.warning("[DAILY SET] No daily set promotions available")
+            return
+        
         today_date = datetime.now().strftime("%m/%d/%Y")
-        for activity in data.get(today_date, []):
+        activities_today = daily_set_data.get(today_date, [])
+        
+        if not activities_today:
+            logging.info("[DAILY SET] No activities found for today")
+            return
+        
+        for activity in activities_today:
             try:
-                if activity["complete"] is False:
+                if activity.get("complete", True) is False:
                     card_id = int(activity["offerId"][-1:])
                     # Open the Daily Set activity
                     self.activities.open_daily_set_activity(card_id)
                     self.complete_url_reward_promotion(activity, card_id)
-                    if activity["promotionType"] == "quiz":
+                    if activity.get("promotionType") == "quiz":
                         self.complete_daily_stuff(activity, card_id)
             except Exception:  # pylint: disable=broad-except
                 # Reset tabs in case of an exception
